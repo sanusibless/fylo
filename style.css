@@ -1,0 +1,396 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: white;
+  font-family: cursive;
+}
+/*Header Style*/
+body {
+  background-image: url("images/bg-curvy-desktop.svg");
+  background-repeat: no-repeat;
+  background-position-y: 20%;
+}
+header {
+  background-color: hsl(217, 28%, 15%);
+  display: flex;
+  justify-content: space-between;
+}
+
+header .logo {
+  width: 40%;
+  padding: 10px 0;
+}
+
+.logo img {
+  max-width: 40%;
+}
+
+header .nav {
+  width: 60%;
+  text-align: right;
+}
+@media screen and (min-width: 600px) {
+  header .nav {
+    width: 40%;
+    text-align: right;
+  }
+}
+
+@media screen and (min-width: 600px) {
+  article {
+    width: 70%;
+    margin: auto;
+  }
+}
+.nav ul {
+  list-style-type: none;
+  padding: 10px;
+}
+.nav ul li {
+  display: inline;
+  padding-left: 30px;
+}
+.nav ul li a {
+  color: hsl(165, 3%, 77%);
+  text-decoration: none;
+}
+.nav a:hover {
+  color: hsl(150, 10%, 96%);
+  text-decoration: underline;
+}
+/*Main styles*/
+
+.fylo-main .overlay {
+  background-color: hsla(217, 28%, 15%, 0.95);
+  padding: 30px;
+  position: relative;
+}
+.fylo-intro {
+  margin-bottom: 50px;
+}
+.fylo-intro .intro-image {
+  width: 70%;
+  margin: auto;
+}
+.fylo-intro .intro-image img {
+  width: 100%;
+  height: auto;
+}
+.fylo-intro .intro-words {
+  text-align: center;
+}
+.intro-words .intro-details {
+  margin: 15px 0 5px;
+}
+.fylo-intro .intro-link p {
+  margin: 10px auto;
+  background-image: linear-gradient(
+    to right,
+    hsl(176, 68%, 64%),
+    hsl(198, 60%, 50%)
+  );
+  width: 50%;
+  padding: 15px;
+  border-radius: 25px;
+}
+
+.fylo-intro .intro-link p:hover {
+  background-image: linear-gradient(
+    to right,
+    hsl(176, 68%, 71%),
+    hsl(176, 68%, 64%)
+  );
+}
+.intro-link a {
+  text-decoration: none;
+}
+
+/*Fylo  Details*/
+.fylo-details {
+  display: flex;
+  flex-direction: column;
+}
+.fylo-details-container {
+  width: 100%;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.fylo-details-container h4 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+/* Fylo Production*/
+.fylo-production {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 100px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+.fylo-prod-img {
+  width: 60%;
+  margin: auto;
+}
+.fylo-prod-img img {
+  width: 100%;
+  height: auto;
+}
+.fylo-prod-details h4 {
+  font-size: 20px;
+}
+.fylo-prod-details h4,
+.fylo-prod-details p {
+  margin-bottom: 10px;
+}
+
+.fylo-prod-details p a {
+  color: hsl(176, 68%, 64%);
+  padding: 5px;
+  border-bottom: 1px solid hsl(176, 68%, 64%);
+  text-decoration: none;
+  box-sizing: border-box;
+}
+@media screen and (min-width: 600px) {
+  .fylo-production {
+    margin-top: 50px;
+    flex-direction: row;
+  }
+  .fylo-prod-details {
+    padding: 15px;
+    text-align: justify;
+  }
+}
+
+.fylo-testy {
+  display: flex;
+  flex-direction: column;
+}
+.fylo-testy .q-img {
+  width: 20px;
+}
+
+div.testies {
+  padding: 20px;
+  background-color: hsl(218, 28%, 13%);
+  margin-bottom: 15px;
+  border-radius: 3px;
+}
+.testy-text {
+  text-align: justify;
+  margin-bottom: 30px;
+}
+
+.profile {
+  display: flex;
+  flex-direction: row;
+  align-self: center;
+}
+.profile-img {
+  margin: auto 0;
+}
+.profile-img img {
+  display: block;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  margin: auto 0;
+}
+.profile-status {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+.profile-status span:first-child {
+  font-weight: bolder;
+}
+.profile-status span:last-child {
+  color: hsl(165, 3%, 77%);
+}
+
+@media screen and (min-width: 600px) {
+  .fylo-testy {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .fylo-testy img {
+    height: 20px;
+  }
+  .testies {
+    width: 30%;
+  }
+}
+.register {
+  margin: 50px 0;
+  position: relative;
+  bottom: -160px;
+}
+
+.register-inner {
+  padding: 30px;
+  box-sizing: border-box;
+  background-color: hsl(217, 28%, 15%);
+}
+.register-info {
+  text-align: center;
+}
+.register-info h1 {
+  margin: 10px;
+}
+
+.register-form {
+  padding-top: 10px;
+}
+.register-form div {
+  width: 100%;
+}
+
+.register #error {
+  color: hsl(0, 100%, 63%);
+  display: none;
+  padding-left: 20px;
+}
+.register #valid {
+  color: rgb(84, 255, 161);
+  padding-left: 20px;
+  display: none;
+}
+.input,
+.button {
+  width: 100%;
+}
+input[type="text"],
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  color: black;
+  margin-bottom: 5px;
+}
+
+input[type="text"]:focus {
+  border: none;
+  outline: none;
+}
+
+button[type="submit"] {
+  background-image: linear-gradient(
+    to right,
+    hsl(176, 68%, 64%),
+    hsl(198, 60%, 50%)
+  );
+  color: white;
+}
+button[type="submit"]:hover {
+  background-image: linear-gradient(
+    to right,
+    hsl(176, 68%, 71%),
+    hsl(176, 68%, 64%)
+  );
+}
+@media screen and (min-width: 600px) {
+  .register-inner {
+    width: 100%;
+    margin: auto;
+  }
+  .register-form form {
+    display: flex;
+    justify-content: space-between;
+  }
+  form div.input {
+    width: 57%;
+  }
+  form div.button {
+    width: 40%;
+  }
+}
+
+/* Footer Styles*/
+footer {
+  background-color: hsl(216, 53%, 9%);
+  padding: 0 20px 20px;
+  padding-top: 200px;
+  color: hsl(165, 3%, 77%);
+}
+
+.footer-logo img {
+  width: 100px;
+}
+
+.footer-details {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  color: hsl(165, 3%, 77%);
+}
+.footer-details-inner {
+  display: flex;
+  flex-direction: row;
+  width: 50%;
+}
+.footer-details-inner div {
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+.footer-details-inner div p {
+  color: hsl(165, 3%, 77%);
+}
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-nav-inner ul {
+  list-style-type: none;
+  padding: 10px;
+}
+
+.footer-nav-inner ul li a {
+  text-decoration: none;
+  color: hsl(165, 3%, 77%);
+}
+.footer-nav-inner ul li a:hover {
+  color: hsl(0, 0%, 100%);
+}
+
+.social-logo {
+  text-align: center;
+}
+
+@media screen and (min-width: 600px) {
+  article {
+    width: 70%;
+    margin: auto;
+  }
+
+  article.register {
+    width: 60%;
+    margin: auto;
+  }
+
+  article.fylo-details {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-flow: wrap;
+  }
+  article.fylo-details .fylo-details-container {
+    width: 50%;
+    padding: 10px;
+  }
+  .footer-details {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+}
+
+i {
+  color:  wheat;
+}
