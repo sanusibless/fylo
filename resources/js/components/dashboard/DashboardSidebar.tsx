@@ -73,7 +73,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
 
         {/* Upload Button */}
         <div className="p-4">
-          <Button className="w-full bg-gradient-primary hover:bg-gradient-hover text-white">
+          <Button className="w-full bg-gradient bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[] hover:bg-[hsl(200,77%,54%)]/90">
             <Upload className="mr-2 h-4 w-4" />
             Upload Files
           </Button>
@@ -83,16 +83,17 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         <nav className="px-4 space-y-1">
           {navigation.map((item) => {
 
+            console.log(currentRoute);
             const isActive = currentRoute === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-[hsl(185,77%,54%)]/80",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "text-white p-4 rounded-lg hover:bg-[hsl(185,77%,54%)]/80"
+                    : ""
                 )}
               >
                 <item.icon className="mr-3 h-4 w-4" />
