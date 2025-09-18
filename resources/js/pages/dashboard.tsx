@@ -1,52 +1,16 @@
-// import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-// import AppLayout from '@/layouts/app-layout';
-// import { dashboard } from '@/routes';
-// import { type BreadcrumbItem } from '@/types';
-// import { Head } from '@inertiajs/react';
-
-// const breadcrumbs: BreadcrumbItem[] = [
-//     {
-//         title: 'Dashboard',
-//         href: dashboard().url,
-//     },
-// ];
-
-// export default function Dashboard() {
-//     return (
-//         <AppLayout breadcrumbs={breadcrumbs}>
-//             <Head title="Dashboard" />
-//             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-//                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-//                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-//                         <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-//                     </div>
-//                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-//                         <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-//                     </div>
-//                     <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-//                         <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-//                     </div>
-//                 </div>
-//                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-//                     <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-//                 </div>
-//             </div>
-//         </AppLayout>
-//     );
-// }
-
 
 import { useState } from "react";
 import { Grid, List, Filter, SortAsc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardSidebar } 
-import { DashboardHeader } 
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCards } from "@/components/StatsCards";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentActivity } from "@/components/RecentActivity";
 import { FileCard } from "@/components/FileCard";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
+import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout"; 
 
 const mockFiles = [
   {
@@ -100,12 +64,8 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
-    <div className="min-h-screen bg-background flex w-full">
-      <DashboardSidebar
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
-
+    <DashboardLayout>
+      <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex-1 flex flex-col lg:ml-0">
         <DashboardHeader onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -197,6 +157,6 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

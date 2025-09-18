@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
 import {
   Files,
   FolderOpen,
@@ -11,14 +10,17 @@ import {
   Clock,
   HardDrive,
   Menu,
-  X
+  X,
+  Route
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { Link } from "@inertiajs/react";
+import { route } from 'ziggy-js';
 
 const navigation = [
-  { name: "All Files", href: "/", icon: Files },
+  { name: "All Files", href: "/dashboard", icon: Files },
   { name: "Recent", href: "/recent", icon: Clock },
   { name: "Starred", href: "/starred", icon: Star },
   { name: "Shared", href: "/shared", icon: Users },
@@ -32,8 +34,7 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
-  const location = useLocation();
-
+    const currentRoute = route().current();
   return (
     <>
       {/* Mobile overlay */}
@@ -45,10 +46,13 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
       )}
 
       {/* Sidebar */}
-      <div className={cn(
-        "fixed left-0 top-0 z-50 h-full w-64 transform bg-fylo-header border-r border-border transition-transform duration-300 ease-in-out lg:static lg:z-0 lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+            "h-screen w-64 bg-fylo-header border-r border-border transition-transform duration-300 ease-in-out",
+            "fixed top-0 left-0 z-50 transform lg:transform-none lg:relative lg:z-0",
+            isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
+        >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center space-x-2">
@@ -78,11 +82,12 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         {/* Navigation */}
         <nav className="px-4 space-y-1">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
+
+            const isActive = currentRoute === item.href;
             return (
-              <NavLink
+              <Link
                 key={item.name}
-                to={item.href}
+                href={item.href}
                 className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                   isActive
@@ -92,7 +97,7 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
               >
                 <item.icon className="mr-3 h-4 w-4" />
                 {item.name}
-              </NavLink>
+              </Link>
             );
           })}
         </nav>

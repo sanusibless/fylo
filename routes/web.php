@@ -17,8 +17,28 @@ Route::get('/faqs', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('recent');
+
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('starred');
+
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('shared');
+
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('folders');
+
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('trash');
 });
 
 require __DIR__.'/settings.php';
