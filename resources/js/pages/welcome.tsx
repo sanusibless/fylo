@@ -130,7 +130,7 @@ export default function Welcome() {
                         help.
                     </p>
                     <form className="flex flex-col md:flex-row gap-4 justify-center">
-                        <input type="email" placeholder="Enter your email" className="px-4 py-3 rounded-full text-black flex-1" />
+                        <input type="email" placeholder="Enter your email" className="px-4 py-3 rounded-full text-white flex-1 border-1 border-white focus:outline-none" />
                         <button type="submit" className="bg-gradient-to-r from-teal-300 to-blue-500 px-6 py-3 rounded-full text-white hover:from-teal-200 hover:to-teal-400">
                         Get Started For Free
                         </button>

@@ -3,6 +3,7 @@ import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
+
 interface AuthLayoutProps {
     name?: string;
     title?: string;

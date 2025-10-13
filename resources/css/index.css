@@ -43,15 +43,15 @@
     --fylo-main: 218 39% 11%; /* #1c2431 */
     --fylo-card: 218 33% 16%; /* #202a3c */
     --fylo-text-muted: 220 13% 69%;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(192 77% 59%), hsl(213 94% 68%));
     --gradient-hover: linear-gradient(135deg, hsl(192 77% 64%), hsl(192 77% 54%));
-    
+
     /* Shadows */
     --shadow-card: 0 4px 6px -1px hsl(218 54% 8% / 0.3);
     --shadow-elevated: 0 10px 25px -3px hsl(218 54% 8% / 0.4);
-    
+
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
