@@ -18,9 +18,12 @@ export default function UploadFile() {
     const [openUploadFile, setOpenUploadFile] = useState(false);
     return (
         <Dialog open={openUploadFile} onOpenChange={setOpenUploadFile}>
-            <DialogTrigger>
-            <Upload className="mr-2 h-4 w-4" />
-                Upload File</DialogTrigger>
+            <DialogTrigger className="my-2 ml-4 w-fit">
+                <Button className="w-full bg-gradient bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[] hover:bg-[hsl(200,77%,54%)]/90">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Files
+                </Button>
+            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Upload a file</DialogTitle>
