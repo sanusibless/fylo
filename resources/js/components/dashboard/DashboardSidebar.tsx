@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Link } from "@inertiajs/react";
 import { route } from 'ziggy-js';
+import UploadFile from "./UploadFile";
 
 const navigation = [
   { name: "All Files", href: "/dashboard", icon: Files },
@@ -72,12 +73,15 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
         </div>
 
         {/* Upload Button */}
-        <div className="p-4">
+
+        <UploadFile />
+
+        {/* <div className="p-4">
           <Button className="w-full bg-gradient bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[] hover:bg-[hsl(200,77%,54%)]/90">
             <Upload className="mr-2 h-4 w-4" />
             Upload Files
           </Button>
-        </div>
+        </div> */}
 
         {/* Navigation */}
         <nav className="px-4 space-y-1">

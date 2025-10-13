@@ -1,8 +1,11 @@
 import HomeLayout from "@/layouts/home/layout";
 
+
 export default function Features() {
   return (
-        <HomeLayout>
+        <>
+        <HomeLayout title="Fylo Features">
+
             <section className="bg-gray-900 text-white py-24 px-6">
                     <div className="max-w-7xl mx-auto">
                         {/* Section Heading */}
@@ -144,5 +147,7 @@ export default function Features() {
                     </div>
                 </section>
         </HomeLayout>
+        </>
+
   );
 }

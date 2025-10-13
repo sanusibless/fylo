@@ -6,7 +6,7 @@ export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
 
     return (
-        <HomeLayout>
+        <HomeLayout title="Welcome to Fylo, a secure cloud storage and collaboration platform.">
                 <main className="bg-[#1c2431]/95 p-6">
                     {/* Intro */}
                     <section className="text-center mb-16">

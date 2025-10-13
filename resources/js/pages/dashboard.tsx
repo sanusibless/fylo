@@ -10,7 +10,8 @@ import { QuickActions } from "@/components/QuickActions";
 import { RecentActivity } from "@/components/RecentActivity";
 import { FileCard } from "@/components/FileCard";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
-import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout"; 
+import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout";
+import useAuth from "@/hooks/use-auth";
 
 const mockFiles = [
   {
@@ -64,7 +65,7 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Dashboard">
       <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex-1 flex flex-col lg:ml-0">
         <DashboardHeader onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />

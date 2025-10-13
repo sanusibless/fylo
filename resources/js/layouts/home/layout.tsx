@@ -3,16 +3,9 @@ import { Head, Link } from "@inertiajs/react";
 
 
 
-export default function HomeLayout({ children }: { children: React.ReactNode }) {
+export default function HomeLayout({ title, children }: { title : string, children: React.ReactNode }) {
     return <>
-                <Head title="Fylo - Home Page">
-                    <link rel="preconnect" href="https://fonts.bunny.net" />
-                    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-                    <link rel="icon" type="image/png" sizes="30x30" href="images/logo.svg" />
-                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-yH4VJ1J/ABkP+iD1EZU5t3hM7cYfJwJZn8H2Xo1+zqz2N6j5o6zC5WGBVf0TnVngb+zvC32B8/J9Hd0UL6FzHQ=="
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer" />
-                </Head>
+                <Head title={title} />
                 <header className="bg-[#0b1523] flex justify-between items-center px-6 py-4">
                     <div className="w-1/3">
                         <Link href={home()}><img src="images/logo.svg" alt="Fylo Logo" className="w-32" />

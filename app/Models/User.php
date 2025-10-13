@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable
 {
@@ -33,6 +34,8 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = ['initial'];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -44,5 +47,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getInitialAttribute()
+    {
+        $explodedName = explode(' ', $this->name);
+
+        Log::warning("name", $explodedName);
+
+        if (count($explodedName) > 1) {
+            return $explodedName[0][0] . $explodedName[1][0];
+        }
+        return mb_substr($this->name, 0, 1);
     }
 }
