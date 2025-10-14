@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class File extends Model
 {
     protected $table = 'uploaded_files';
+    protected $guarded = ['id'];
 
     public static function boot()
     {

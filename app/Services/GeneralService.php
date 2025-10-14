@@ -29,4 +29,10 @@ class GeneralService
         Log::warning("Error in " . $this->name, 
         ["" => $throwable ]);
     }
+
+    public  static function generalLog($message, Throwable $throwable)
+    {
+        Log::warning($message ,
+        ["" => $throwable ]);
+    }
 }

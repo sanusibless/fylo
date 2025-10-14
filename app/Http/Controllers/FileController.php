@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FileUploadRequest;
 use App\Services\FileService;
+use App\Services\GeneralService;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
     public function __construct(protected FileService $fileService)
     {
-        
+
     }
 
     public function store(FileUploadRequest $request)
@@ -19,15 +20,14 @@ class FileController extends Controller
 
             $file = $request->file('file');
 
-            $this->fileService->log("File", [
-                "name" => $file->getClientOriginalName(),
-                "type" => $file->getClientMimeType(),
-                "file_size" => $file->getSize(),
-                "ext" => $file->getClientOriginalExtension(),
-            ]);
-
+            $fileResponse = $this->fileService->storeFile(auth()->id(), $file);
+            if($fileResponse['status']) {
+                return redirect()->back()->with('status', $fileResponse['message']);
+            }
         } catch(\Throwable $th) {
-
+           GeneralService::generalLog("Error in FileController", $th);
         }
+
+        return redirect()->back()->withErrors('error', 'unable to upload file')->withInput();
     }
 }
