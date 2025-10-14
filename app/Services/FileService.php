@@ -16,10 +16,11 @@ class FileService extends GeneralService
 
             $base_url = config('app.url');
             $name = explode('.', $file->getClientOriginalName())[0];
-            $filePath =  $file->storeAs($folder, $file->getClientOriginalName(), 'public');
+            $fileName = str()->slug($name) . "." . $file->getClientOriginalExtension();
+            $filePath =  $file->storeAs($folder, $fileName, 'public');
             File::create([
                 'user_id' => $user_id,
-                'name' => str()->slug($name) . "." . $file->getClientOriginalExtension(),
+                'name' => $fileName,
                 'type' => $file->getClientOriginalExtension(),
                 'size' => $file->getSize(),
                 'base_url' => $base_url,
