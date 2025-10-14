@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
@@ -20,6 +21,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::prefix('file')->name('file.')->group(function () {
+        Route::post('upload', [FileController::class, 'store'])->name('upload');
+    });
 
     Route::get('logs', [LogViewerController::class, 'index']);
 

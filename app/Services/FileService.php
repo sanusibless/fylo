@@ -1,0 +1,30 @@
+<?php
+namespace App\Services;
+
+use App\Models\File;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+
+class FileService extends GeneralService
+{
+
+    protected $name = 'FileService';
+
+    public function storeFile($user_id, UploadedFile $file, $location = 'local') 
+    {
+        try {
+            $filePath =  $file->disk($location)->storeAs($location, $file->getClientOriginalName(), '');
+            File::create([
+                'user_id' => $user_id,
+                'name' => $file->getClientOriginalName(),
+                'type' => $file->getClientOriginalExtension(),
+                'size' => $file->getSize(),
+                'relative_path' => $filePath
+            ]);
+            return $this->serviceResponse(true, "File Uploaded successfully", null);
+        } catch (\Throwable $th) {
+            $this->logError($th);
+        }
+        return $this->serviceResponse(false, "Unable to upload file", null);
+    }
+}
