@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StoragePlan;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,10 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('user_storage_plans', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class);
-            $table->string('storage_capacity')->default(10);
+            $table->foreignIdFor(StoragePlan::class);
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('user_storage_plans');
     }
 };
