@@ -17,17 +17,18 @@ class FileController extends Controller
     public function store(FileUploadRequest $request)
     {
         try {
-
+            
             $file = $request->file('file');
 
             $fileResponse = $this->fileService->storeFile(auth()->id(), $file);
             if($fileResponse['status']) {
                 return redirect()->back()->with('status', $fileResponse['message']);
             }
+            return redirect()->back()->withErrors(['file' => $fileResponse['message'] ?? 'Unable to upload file'])->withInput();
         } catch(\Throwable $th) {
            GeneralService::generalLog("Error in FileController", $th);
         }
 
-        return redirect()->back()->withErrors('error', 'unable to upload file')->withInput();
+        return redirect()->back()->withErrors(['file' => 'unable to upload file'])->withInput();
     }
 }

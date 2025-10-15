@@ -25,6 +25,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { route } from "ziggy-js";
 import { router } from "@inertiajs/react";
+import { toast } from "sonner";
 
 // ✅ Zod schema for file validation
 const formSchema = z.object({
@@ -62,8 +63,25 @@ export default function UploadFile() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+
     const file = values.file[0];
-    router.post(route("file.upload"), { file }, { onSuccess: () => setOpenUploadFile(false) });
+    router.post(route("file.upload"), { file }, {
+        onSuccess: () => {
+            setOpenUploadFile(false)
+            form.reset();
+            toast.success("File uploaded successfully");
+        },
+        onError: (errors) => {
+            setOpenUploadFile(true)
+            if (errors.file) {
+                toast.error(errors.file);
+                form.setError("file", {
+                  type: "server",
+                  message: errors.file,
+                });
+            }
+        }
+    });
   }
 
   return (
@@ -82,7 +100,7 @@ export default function UploadFile() {
 
         <Form {...form}>
           <form
-          
+
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-4"
           >

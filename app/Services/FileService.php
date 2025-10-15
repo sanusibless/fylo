@@ -24,8 +24,8 @@ class FileService extends GeneralService
                 'type' => $file->getClientOriginalExtension(),
                 'size' => $file->getSize(),
                 'base_url' => $base_url,
-                'full_path' => $base_url . '/' . $filePath,
-                'relative_path' => $filePath
+                'full_path' => $base_url . "/storage" . "/$filePath",
+                'relative_path' => "/storage/$filePath"
             ]);
             return $this->serviceResponse(true, "File Uploaded successfully", null);
         } catch (\Throwable $th) {
