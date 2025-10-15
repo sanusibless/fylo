@@ -1,38 +1,40 @@
 import { Files, Users, HardDrive, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const stats = [
-  {
-    name: "Total Files",
-    value: "2,847",
-    change: "+12%",
-    changeType: "positive" as const,
-    icon: Files,
-  },
-  {
-    name: "Shared Files",
-    value: "463",
-    change: "+5%",
-    changeType: "positive" as const,
-    icon: Users,
-  },
-  {
-    name: "Storage Used",
-    value: "6.5 GB",
-    change: "+2.1 GB",
-    changeType: "neutral" as const,
-    icon: HardDrive,
-  },
-  {
-    name: "Downloads",
-    value: "1,249",
-    change: "+8%",
-    changeType: "positive" as const,
-    icon: TrendingUp,
-  },
-];
 
-export function StatsCards() {
+
+export function StatsCards({ totalFiles, sharedFiles, storageUsed, downloads }) {
+
+    const stats = [
+        {
+          name: "Total Files",
+          value: totalFiles,
+          change: "+12%",
+          changeType: "positive" as const,
+          icon: Files,
+        },
+        {
+          name: "Shared Files",
+          value: sharedFiles,
+          change: "+5%",
+          changeType: "positive" as const,
+          icon: Users,
+        },
+        {
+          name: "Storage Used",
+          value: storageUsed + "GB",
+          change: "+2.1 GB",
+          changeType: "neutral" as const,
+          icon: HardDrive,
+        },
+        {
+          name: "Downloads",
+          value: downloads,
+          change: "+8%",
+          changeType: "positive" as const,
+          icon: TrendingUp,
+        },
+      ];
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat) => {

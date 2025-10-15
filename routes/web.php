@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,10 +19,9 @@ Route::get('/faqs', function () {
 })->name('faqs');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // File Upload
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
     });

@@ -29,8 +29,8 @@ interface FileCardProps {
     name: string;
     type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
     size: string;
-    modifiedAt: string;
-    isStarred?: boolean;
+    formatted_date: string;
+    is_favorite?: boolean;
     thumbnail?: string;
   };
   view: 'grid' | 'list';
@@ -59,7 +59,7 @@ const getFileColor = (type: string) => {
 };
 
 export function FileCard({ file, view }: FileCardProps) {
-  const [isStarred, setIsStarred] = useState(file.isStarred || false);
+  const [isStarred, setIsStarred] = useState(file.is_favorite || false);
   const FileIcon = getFileIcon(file.type);
   const iconColor = getFileColor(file.type);
 
@@ -70,7 +70,7 @@ export function FileCard({ file, view }: FileCardProps) {
           <FileIcon className={cn("h-5 w-5", iconColor)} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-            <p className="text-xs text-muted-foreground">{file.modifiedAt}</p>
+            <p className="text-xs text-muted-foreground">{file.formatted_date}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">

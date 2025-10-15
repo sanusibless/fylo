@@ -12,57 +12,61 @@ import { FileCard } from "@/components/FileCard";
 import dashboardHero from "@/assets/dashboard-hero.jpg";
 import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout";
 import useAuth from "@/hooks/use-auth";
+import { react } from '@vitejs/plugin-react';
 
-const mockFiles = [
-  {
-    id: "1",
-    name: "Project-Presentation.pptx",
-    type: "document" as const,
-    size: "2.4 MB",
-    modifiedAt: "2 hours ago",
-    isStarred: true,
-  },
-  {
-    id: "2",
-    name: "Team-Photo.jpg",
-    type: "image" as const,
-    size: "1.8 MB",
-    modifiedAt: "1 day ago",
-  },
-  {
-    id: "3",
-    name: "Demo-Video.mp4",
-    type: "video" as const,
-    size: "24.5 MB",
-    modifiedAt: "3 days ago",
-  },
-  {
-    id: "4",
-    name: "Background-Music.mp3",
-    type: "audio" as const,
-    size: "5.2 MB",
-    modifiedAt: "1 week ago",
-  },
-  {
-    id: "5",
-    name: "Archive-Backup.zip",
-    type: "archive" as const,
-    size: "156 MB",
-    modifiedAt: "2 weeks ago",
-    isStarred: true,
-  },
-  {
-    id: "6",
-    name: "Budget-Report.xlsx",
-    type: "document" as const,
-    size: "890 KB",
-    modifiedAt: "3 weeks ago",
-  },
-];
 
-export default function Dashboard() {
+
+export default function Dashboard({ totalFiles, totalShared, storageUsed, downloads, recentFiles }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const user  = useAuth();
+
+  const mockFiles = [
+    {
+      id: "1",
+      name: "Project-Presentation.pptx",
+      type: "document" as const,
+      size: "2.4 MB",
+      modifiedAt: "2 hours ago",
+      isStarred: true,
+    },
+    {
+      id: "2",
+      name: "Team-Photo.jpg",
+      type: "image" as const,
+      size: "1.8 MB",
+      modifiedAt: "1 day ago",
+    },
+    {
+      id: "3",
+      name: "Demo-Video.mp4",
+      type: "video" as const,
+      size: "24.5 MB",
+      modifiedAt: "3 days ago",
+    },
+    {
+      id: "4",
+      name: "Background-Music.mp3",
+      type: "audio" as const,
+      size: "5.2 MB",
+      modifiedAt: "1 week ago",
+    },
+    {
+      id: "5",
+      name: "Archive-Backup.zip",
+      type: "archive" as const,
+      size: "156 MB",
+      modifiedAt: "2 weeks ago",
+      isStarred: true,
+    },
+    {
+      id: "6",
+      name: "Budget-Report.xlsx",
+      type: "document" as const,
+      size: "890 KB",
+      modifiedAt: "3 weeks ago",
+    },
+  ];
 
   return (
     <DashboardLayout title="Dashboard">
@@ -81,7 +85,7 @@ export default function Dashboard() {
               />
             </div>
             <div className="relative p-8 text-white">
-              <h1 className="text-3xl font-bold mb-2">Welcome back, John!</h1>
+              <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
               <p className="text-white/90 mb-6">
                 Manage your files, collaborate with your team, and stay productive.
               </p>
@@ -92,7 +96,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Cards */}
-          <StatsCards />
+          <StatsCards totalFiles={totalFiles} sharedFiles={totalShared} storageUsed={storageUsed} downloads={downloads} />
 
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-4 gap-8">
@@ -135,14 +139,14 @@ export default function Dashboard() {
                 <CardContent>
                   {viewMode === 'grid' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                      {mockFiles.map((file) => (
-                        <FileCard key={file.id} file={file} view="grid" />
+                      {recentFiles.map((file) => (
+                        <FileCard key={file.uuid} file={file} view="grid" />
                       ))}
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {mockFiles.map((file) => (
-                        <FileCard key={file.id} file={file} view="list" />
+                      {recentFiles.map((file) => (
+                        <FileCard key={file.uuid} file={file} view="list" />
                       ))}
                     </div>
                   )}

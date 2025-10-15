@@ -38,4 +38,13 @@ class File extends Model
     {
         return round($this->size / (1024 * 1024), 2) . "MB";
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function getFormattedDateAttribute()
+    {
+        return $this->created_at->diffForHumans();
+    }
 }

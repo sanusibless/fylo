@@ -30,9 +30,10 @@ class GeneralService
         ["" => $throwable ]);
     }
 
-    public  static function generalLog($message, Throwable $throwable)
+    public static function generalLog($message, $data)
     {
         Log::warning($message ,
-        ["" => $throwable ]);
+            ["" => $data 
+        ]);
     }
 }

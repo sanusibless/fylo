@@ -18,13 +18,14 @@ class FileService extends GeneralService
             $name = explode('.', $file->getClientOriginalName())[0];
             $fileName = str()->slug($name) . "." . $file->getClientOriginalExtension();
             $filePath =  $file->storeAs($folder, $fileName, 'public');
+            
             File::create([
                 'user_id' => $user_id,
                 'name' => $fileName,
-                'type' => $file->getClientOriginalExtension(),
+                'type' => getFileType($file->getClientOriginalExtension()),
                 'size' => $file->getSize(),
                 'base_url' => $base_url,
-                'full_path' => $base_url . "/storage" . "/$filePath",
+            'full_path' => $base_url . "/storage" . "/$filePath",
                 'relative_path' => "/storage/$filePath"
             ]);
             return $this->serviceResponse(true, "File Uploaded successfully", null);
