@@ -22,6 +22,7 @@ class FileController extends Controller
 
             $fileResponse = $this->fileService->storeFile(auth()->id(), $file);
             if($fileResponse['status']) {
+                
                 return redirect()->back()->with('status', $fileResponse['message']);
             }
             return redirect()->back()->withErrors(['file' => $fileResponse['message'] ?? 'Unable to upload file'])->withInput();
@@ -31,4 +32,23 @@ class FileController extends Controller
 
         return redirect()->back()->withErrors(['file' => 'unable to upload file'])->withInput();
     }
+
+    public function starringFile($file_uuid)
+    {
+        try {
+        $fileResponse = $this->fileService->setAsFavouriteFile($file_uuid);
+            if($fileResponse['status']) {
+                GeneralService::generalLog("File stared",[]);
+                return redirect()->back()->with('starred', $fileResponse['data']['starred']);
+            }
+            GeneralService::generalLog("File unable to stared",[]);
+
+        return redirect()->back()->withErrors(['error' => $fileResponse['message'] ?? 'Unable to set as favourite file']);
+        } catch(\Throwable $th) {
+        GeneralService::generalLog("Error in FileController", $th);
+        }
+
+        return redirect()->back()->withErrors(['file' => 'unable to upload file'])->withInput();
+    }
+
 }

@@ -34,4 +34,24 @@ class FileService extends GeneralService
         }
         return $this->serviceResponse(false, "Unable to upload file", null);
     }
+
+    public function setAsFavouriteFile($file_uuid)
+    {
+        try {
+            $file = File::where('uuid', $file_uuid)->first();
+            if(!$file) {
+                return $this->serviceResponse(false, "File not found", null);
+            }
+            $file->update([
+                'is_favourite' => !$file->is_favourite
+            ]);
+            return $this->serviceResponse(true, "", [
+                'starred' => $file->is_favourite, 
+                'message' => $file->is_favourite ? "File starred successfully" : "File unstarred successfully"
+            ]);
+        } catch (\Throwable $th) {
+            $this->logError($th);
+        }
+        return $this->serviceResponse(false, "Unable to star file", null);  
+    }
 }

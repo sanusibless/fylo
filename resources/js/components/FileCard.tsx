@@ -22,12 +22,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { router } from "@inertiajs/react";
+import { route } from "ziggy-js";
 
 interface FileCardProps {
   file: {
     id: string;
     name: string;
     type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
+    uuid: string;
     size: string;
     size_in_mb: number;
     formatted_date: string;
@@ -59,10 +62,24 @@ const getFileColor = (type: string) => {
   }
 };
 
+
+
 export function FileCard({ file, view }: FileCardProps) {
   const [isStarred, setIsStarred] = useState(file.is_favorite || false);
   const FileIcon = getFileIcon(file.type);
   const iconColor = getFileColor(file.type);
+
+  const handleStarringClick = (e,file_uuid: string) => {
+    e.preventDefault();
+    console.log(file.uuid);
+    router.get(route("file.toggle_favorite", { file_uuid: file_uuid }), {}, {
+
+      onSuccess: (data) => {
+        console.log(data.props);
+    }
+});
+
+  }
 
   if (view === 'list') {
     return (
@@ -75,11 +92,11 @@ export function FileCard({ file, view }: FileCardProps) {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-muted-foreground">{file.size}</span>
+          <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsStarred(!isStarred)}
+            onClick={() => handleStarringClick(e, file.uuid)}
             className={cn(
               "opacity-0 group-hover:opacity-100 transition-opacity",
               isStarred && "opacity-100 text-yellow-500"
@@ -129,10 +146,8 @@ export function FileCard({ file, view }: FileCardProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsStarred(!isStarred);
-              }}
+              onClick={() => handleStarringClick(e, file.uuid)}
+
               className={cn(isStarred && "text-yellow-500")}
             >
               <Star className={cn("h-4 w-4", isStarred && "fill-current")} />

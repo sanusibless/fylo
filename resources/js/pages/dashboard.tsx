@@ -16,7 +16,7 @@ import { react } from '@vitejs/plugin-react';
 
 
 
-export default function Dashboard({ totalFiles, totalShared, storageUsed, downloads, recentFiles, storage }) {
+export default function Dashboard({ totalFiles, totalShared, downloads, recentFiles, storage }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const user  = useAuth();
