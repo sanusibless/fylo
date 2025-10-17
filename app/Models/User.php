@@ -48,11 +48,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    protected static function booted()  
+    protected static function booted()
     {
         parent::boot();
         static::creating(function ($user) {
-            Settings::create(['user_id' => $user->id]);
+            UserStoragePlan::create(['user_id' => $user->id, 'storage_plan_id' => 1]);
         });
     }
 
@@ -83,6 +83,11 @@ class User extends Authenticatable
     public function totalStorageUsed()
     {
         $totalSize = $this->files()->sum('size');
-        return $totalSize / (1024 * 1024 * 1024);
+        return round($totalSize / (1024 * 1024 * 1024), 2);
+    }
+
+    public function storagePlan()
+    {
+        return $this->hasOne(UserStoragePlan::class)->with('storagePlanDetail');
     }
 }

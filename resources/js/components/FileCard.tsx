@@ -29,6 +29,7 @@ interface FileCardProps {
     name: string;
     type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
     size: string;
+    size_in_mb: number;
     formatted_date: string;
     is_favorite?: boolean;
     thumbnail?: string;
@@ -167,7 +168,7 @@ export function FileCard({ file, view }: FileCardProps) {
         <div className="space-y-1">
           <h3 className="font-medium text-sm text-foreground truncate">{file.name}</h3>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{file.size}</span>
+            <span>{file.size_in_mb}</span>
             <span>{file.modifiedAt}</span>
           </div>
         </div>

@@ -32,10 +32,16 @@ const navigation = [
 interface DashboardSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  storage: {
+    totalUsed: number | string;
+    totalAvailable: number | string;
+  };
 }
 
-export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
+export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebarProps) {
     const currentRoute = route().current();
+    const { totalUsed, totalAvailable } = storage;
+
   return (
     <>
       {/* Mobile overlay */}
@@ -114,10 +120,10 @@ export function DashboardSidebar({ isOpen, onToggle }: DashboardSidebarProps) {
               <HardDrive className="mr-2 h-4 w-4" />
               Storage Usage
             </div>
-            <Progress value={65} className="h-2" />
+            <Progress value={Number(totalUsed)} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>6.5 GB used</span>
-              <span>10 GB total</span>
+              <span>{totalUsed} GB used</span>
+              <span>{totalAvailable} GB total</span>
             </div>
             <Button variant="outline" size="sm" className="w-full">
               Upgrade Plan

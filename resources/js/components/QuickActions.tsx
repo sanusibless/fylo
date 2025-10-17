@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const actions = [
   {
     name: "Upload Files",
-    description: "Add new files to your storage",
+    description: "Add new files",
     icon: Upload,
     primary: true,
   },

@@ -16,10 +16,15 @@ import { react } from '@vitejs/plugin-react';
 
 
 
-export default function Dashboard({ totalFiles, totalShared, storageUsed, downloads, recentFiles }) {
+export default function Dashboard({ totalFiles, totalShared, storageUsed, downloads, recentFiles, storage }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const user  = useAuth();
+
+  console.log({
+    'user': user,
+    'storage': storage
+  })
 
   const mockFiles = [
     {
@@ -70,7 +75,7 @@ export default function Dashboard({ totalFiles, totalShared, storageUsed, downlo
 
   return (
     <DashboardLayout title="Dashboard">
-      <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} storage={storage} />
       <div className="flex-1 flex flex-col lg:ml-0">
         <DashboardHeader onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -96,7 +101,7 @@ export default function Dashboard({ totalFiles, totalShared, storageUsed, downlo
           </div>
 
           {/* Stats Cards */}
-          <StatsCards totalFiles={totalFiles} sharedFiles={totalShared} storageUsed={storageUsed} downloads={downloads} />
+          <StatsCards totalFiles={totalFiles} sharedFiles={totalShared} storageUsed={storage.totalUsed} downloads={downloads} />
 
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-4 gap-8">

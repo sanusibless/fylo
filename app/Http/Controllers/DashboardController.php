@@ -14,7 +14,10 @@ class DashboardController extends Controller
             'recentFiles' => $files->orderByDesc("created_at")->take(20)->get(),
             'totalFiles' => $files->count(),
             'totalShared' =>  auth()->user()->totalSharedFiles(),
-            'storageUsed' => auth()->user()->totalStorageUsed(),
+            'storage' => [
+                'totalUsed' => auth()->user()->totalStorageUsed(),
+                'availableStorage' => auth()->user()->storagePlan->storagePlanDetail,
+            ]
         ]);
     }
 }

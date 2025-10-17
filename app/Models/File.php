@@ -9,6 +9,8 @@ class File extends Model
     protected $table = 'uploaded_files';
     protected $guarded = ['id'];
 
+    protected $appends = ['size_in_kb', 'size_in_mb'];
+
     public static function boot()
     {
         parent::boot();

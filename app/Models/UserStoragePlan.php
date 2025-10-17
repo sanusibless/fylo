@@ -12,4 +12,9 @@ class UserStoragePlan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function storagePlanDetail()
+    {
+        return $this->belongsTo(StoragePlan::class, 'storage_plan_id');
+    }
 }
