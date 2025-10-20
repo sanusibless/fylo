@@ -45,9 +45,7 @@ class FileService extends GeneralService
             $file->update([
                 'is_favorite' => !$file->is_favorite
             ]);
-            $this->log("File Status",[
-                'is_favorite' => $file->is_favorite
-            ]);
+            
             return $this->serviceResponse(true, "", [
                 'starred' => $file->is_favorite,
                 'message' => $file->is_favorite ? "File starred successfully" : "File unstarred successfully"

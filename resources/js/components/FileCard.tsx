@@ -105,7 +105,7 @@ export function FileCard({ file, view }: FileCardProps) {
           >
             <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
           </Button> */}
-          <FileAction file={file} />
+          <FileAction file={file} /> 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
