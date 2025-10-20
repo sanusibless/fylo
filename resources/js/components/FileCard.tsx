@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
+import FileAction from "./FileAction";
 
 interface FileCardProps {
   file: {
@@ -65,7 +66,7 @@ const getFileColor = (type: string) => {
 
 
 export function FileCard({ file, view }: FileCardProps) {
-  const [isStarred, setIsStarred] = useState(file.is_favorite || false);
+  // const [isStarred, setIsStarred] = useState(file.is_favorite || false);
   const FileIcon = getFileIcon(file.type);
   const iconColor = getFileColor(file.type);
 
@@ -93,7 +94,7 @@ export function FileCard({ file, view }: FileCardProps) {
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={() => handleStarringClick(e, file.uuid)}
@@ -103,7 +104,8 @@ export function FileCard({ file, view }: FileCardProps) {
             )}
           >
             <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
-          </Button>
+          </Button> */}
+          <FileAction file={file} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -143,7 +145,7 @@ export function FileCard({ file, view }: FileCardProps) {
             <FileIcon className={cn("h-6 w-6", iconColor)} />
           </div>
           <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => handleStarringClick(e, file.uuid)}
@@ -151,7 +153,9 @@ export function FileCard({ file, view }: FileCardProps) {
               className={cn(isStarred && "text-yellow-500")}
             >
               <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
-            </Button>
+            </Button> */}
+
+            <FileAction file={file} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
@@ -184,7 +188,7 @@ export function FileCard({ file, view }: FileCardProps) {
           <h3 className="font-medium text-sm text-foreground truncate">{file.name}</h3>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{file.size_in_mb}</span>
-            <span>{file.modifiedAt}</span>
+            <span>{file.formatted_date}</span>
           </div>
         </div>
       </CardContent>

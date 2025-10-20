@@ -10,7 +10,7 @@ class FileService extends GeneralService
 
     protected $name = 'FileService';
 
-    public function storeFile($user_id, UploadedFile $file, $folder = 'uploads') 
+    public function storeFile($user_id, UploadedFile $file, $folder = 'uploads')
     {
         try {
 
@@ -18,7 +18,7 @@ class FileService extends GeneralService
             $name = explode('.', $file->getClientOriginalName())[0];
             $fileName = str()->slug($name) . "." . $file->getClientOriginalExtension();
             $filePath =  $file->storeAs($folder, $fileName, 'public');
-            
+
             File::create([
                 'user_id' => $user_id,
                 'name' => $fileName,
@@ -43,15 +43,18 @@ class FileService extends GeneralService
                 return $this->serviceResponse(false, "File not found", null);
             }
             $file->update([
-                'is_favourite' => !$file->is_favourite
+                'is_favorite' => !$file->is_favorite
+            ]);
+            $this->log("File Status",[
+                'is_favorite' => $file->is_favorite
             ]);
             return $this->serviceResponse(true, "", [
-                'starred' => $file->is_favourite, 
-                'message' => $file->is_favourite ? "File starred successfully" : "File unstarred successfully"
+                'starred' => $file->is_favorite,
+                'message' => $file->is_favorite ? "File starred successfully" : "File unstarred successfully"
             ]);
         } catch (\Throwable $th) {
             $this->logError($th);
         }
-        return $this->serviceResponse(false, "Unable to star file", null);  
+        return $this->serviceResponse(false, "Unable to star file", null);
     }
 }

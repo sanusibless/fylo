@@ -23,6 +23,7 @@ return new class extends Migration
             $table->longText('full_path')->nullable();
             $table->longText('relative_path')->nullable();
             $table->boolean('is_favorite')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
