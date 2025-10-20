@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
         Route::get('/{file_uuid}/favorite', [FileController::class, 'starringFile'])->name('toggle_favorite');
+        Route::get('/{file_uuid}/download', [FileController::class, 'downloadFile'])->name('download');
     });
 
     Route::get('logs', [LogViewerController::class, 'index']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileUploadRequest;
+use App\Models\File;
 use App\Services\FileService;
 use App\Services\GeneralService;
 use Illuminate\Http\Request;
@@ -65,4 +66,18 @@ class FileController extends Controller
         return redirect()->back()->withErrors(['file' => 'unable to upload file'])->withInput();
     }
 
+    public function downloadFile($file_uuid)
+    {
+        try {
+            $file = File::where('uuid', $file_uuid)->first();
+            if(!$file) {
+                return redirect()->back()->withErrors(['file' => 'File not found'])->withInput();
+            }
+            $url = str_replace( $file->base_url . "/storage", 'app/public', $file->full_path);
+            return response()->download($url);
+        } catch(\Throwable $th) {
+            GeneralService::generalLog("Error in FileController", $th);
+        }
+        return redirect()->back()->withErrors(['file' => 'unable to download file'])->withInput();
+    }
 }

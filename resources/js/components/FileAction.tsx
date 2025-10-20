@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react'
 import { Button } from '@/components/ui/button'
 import { route } from 'ziggy-js';
-import { Loader2, Star } from 'lucide-react';
+import { Download, Edit2, Loader2, Share2, Star, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -20,34 +20,13 @@ interface FileCardProps {
       is_favorite?: boolean;
       thumbnail?: string;
     };
+    action: 'download' | 'share' | 'delete' | 'star' | 'edit';
   }
-function FileAction({ file } : FileCardProps) {
+function FileAction({ file, action = 'star' } : FileCardProps) {
     const [isStarred, setIsStarred] = useState(file.is_favorite);
     const [showStar, setShowStar] = useState(true);
-    const [isloading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-//   const handleStarringClick = (e: React.MouseEvent<HTMLButtonElement>, fileUuid: string) => {
-//     e.preventDefault()
-
-//     router.visit(route('file.toggle_favorite', { file_uuid: fileUuid }),{
-//       preserveScroll: true,
-//       method: 'get',
-//       preserveState: true,
-//       only: ['flash'],
-//       onSuccess: (page) => {
-//         // you can access flash data like starred from page.props
-
-//         const starred = page.props.flash?.starred
-//         console.log(page.props);
-//         setIsStarred(starred);
-//         toast.success(starred ? 'Starred successfully' : 'Unstarred successfully')
-//       },
-//       onError: (error) => {
-//         console.log(error);
-//         // toast.error(starred ? 'Starred successfully' : 'Unstarred successfully')
-//       },
-//     })
-//   }
 const handleStarringClick = async (e, fileUuid) => {
     e.preventDefault()
   
@@ -75,18 +54,72 @@ const handleStarringClick = async (e, fileUuid) => {
       setIsLoading(false);
       setShowStar(true);
     }
-  }
+}
 
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={(e) => handleStarringClick(e, file.uuid)}
-    >
-      {showStar && <Star className={cn("h-4 w-4 ", isStarred && "fill-current text-yellow-500")} /> }
-      {isloading && <Loader2 className="w-4 h-4 animate-spin text-gray-600" />}
-    </Button>
-  )
+const handleDownload = (e, fileUuid) => {
+  window.location.href = route('file.download', { file_uuid: fileUuid });
+}
+
+  switch(action) {
+    case 'download':
+      return (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => handleDownload(e, file.uuid)}
+        >
+            <Download className="mr-2 h-4 w-4" />
+            Download
+        </Button>
+      )
+    
+      case 'delete':
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => handleStarringClick(e, file.uuid)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        )
+
+        case 'edit':
+          return (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => handleStarringClick(e, file.uuid)}
+            >
+                <Edit2 className="mr-2 h-4 w-4" />
+                Rename
+            </Button>
+          )
+       case 'share':
+        return (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => handleStarringClick(e, file.uuid)}
+          >
+            <Share2 className="mr-2 h-4 w-4" />
+                Share
+          </Button>
+        )
+        
+        default: 
+          return (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => handleStarringClick(e, file.uuid)}
+            >
+                {showStar && <Star className={cn("h-4 w-4 ", isStarred && "fill-current text-yellow-500")} /> }
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-600" />}
+            </Button>
+        )
+  }
 }
 
 export default FileAction

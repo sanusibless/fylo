@@ -105,7 +105,7 @@ export function FileCard({ file, view }: FileCardProps) {
           >
             <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
           </Button> */}
-          <FileAction file={file} /> 
+          <FileAction file={file} action="star" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -114,21 +114,17 @@ export function FileCard({ file, view }: FileCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
-                <Download className="mr-2 h-4 w-4" />
-                Download
+               <FileAction file={file} action="download" />
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
+               <FileAction file={file} action="share" />
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Edit3 className="mr-2 h-4 w-4" />
-                Rename
+               <FileAction file={file} action="edit" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <FileAction file={file} action="delete" />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -155,33 +151,29 @@ export function FileCard({ file, view }: FileCardProps) {
               <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
             </Button> */}
 
-            <FileAction file={file} />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Edit3 className="mr-2 h-4 w-4" />
-                  Rename
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <FileAction file={file} action="star" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+               <FileAction file={file} action="download" />
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+               <FileAction file={file} action="share" />
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+               <FileAction file={file} action="edit" />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive">
+                <FileAction file={file} action="delete" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           </div>
         </div>
         <div className="space-y-1">
