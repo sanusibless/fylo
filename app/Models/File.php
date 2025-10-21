@@ -9,7 +9,7 @@ class File extends Model
     protected $table = 'uploaded_files';
     protected $guarded = ['id'];
 
-    protected $appends = ['size_in_kb', 'size_in_mb'];
+    protected $appends = ['size_in_kb', 'size_in_mb', 'total_downloads'];
 
     public static function boot()
     {
@@ -29,7 +29,7 @@ class File extends Model
     public function getSizeInKBAttribute()
     {
         return round($this->size / 1024, 2) . "KB";
-       
+
     }
     /**
      * Returns the size of the file in megabytes (MB) as a 2 decimal place value.
@@ -48,5 +48,25 @@ class File extends Model
     public function getFormattedDateAttribute()
     {
         return $this->created_at->diffForHumans();
+    }
+
+    public function increaseDownloads()
+    {
+        $this->downloads = $this->downloads + 1;
+        $this->save();
+    }
+
+    public function getTotalDownloadsAttribute()
+    {
+        switch ($this->downloads) {
+            case $this->downloads >= 1000:
+                return $this->downloads/1000 . "K";
+            case $this->downloads >= 1000000:
+                return $this->downloads / 1000000 . "M";
+            case $this->downloads >= 1000000000:
+                return $this->downloads / 1000000000 . "B";
+            default:
+                return $this->downloads;
+        }
     }
 }

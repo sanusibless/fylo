@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Grid, List, Filter, SortAsc } from "lucide-react";
+import { Grid, List, Filter, SortAsc, FolderClockIcon, FolderClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -13,6 +13,7 @@ import dashboardHero from "@/assets/dashboard-hero.jpg";
 import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout";
 import useAuth from "@/hooks/use-auth";
 import { react } from '@vitejs/plugin-react';
+import EmptyState from "@/components/EmptyState";
 
 
 
@@ -142,6 +143,9 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
                   </div>
                 </CardHeader>
                 <CardContent>
+                { recentFiles.length === 0 &&
+                    <EmptyState message="No recent files found" />
+                }
                   {viewMode === 'grid' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                       {recentFiles.map((file) => (

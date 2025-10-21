@@ -23,6 +23,7 @@ return new class extends Migration
             $table->longText('full_path')->nullable();
             $table->longText('relative_path')->nullable();
             $table->boolean('is_favorite')->default(false);
+            $table->decimal('downloads', 16, 2)->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

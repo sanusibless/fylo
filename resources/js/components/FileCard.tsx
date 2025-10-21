@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import FileAction from "./FileAction";
+import { download } from './../routes/file/index';
 
 interface FileCardProps {
   file: {
@@ -35,8 +36,10 @@ interface FileCardProps {
     size: string;
     size_in_mb: number;
     formatted_date: string;
+    total_downloads: string;
     is_favorite?: boolean;
     thumbnail?: string;
+
   };
   view: 'grid' | 'list';
 }
@@ -94,6 +97,7 @@ export function FileCard({ file, view }: FileCardProps) {
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
+          <span className="flex items-center space-x-2 text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
           {/* <Button
             variant="ghost"
             size="sm"
@@ -180,6 +184,7 @@ export function FileCard({ file, view }: FileCardProps) {
           <h3 className="font-medium text-sm text-foreground truncate">{file.name}</h3>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{file.size_in_mb}</span>
+            <span className="flex items-center space-x-2 text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
             <span>{file.formatted_date}</span>
           </div>
         </div>
