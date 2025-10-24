@@ -52,7 +52,7 @@ class File extends Model
 
     public function increaseDownloads()
     {
-        $this->downloads = $this->downloads + 1;
+        $this->downloads += 1;
         $this->save();
     }
 

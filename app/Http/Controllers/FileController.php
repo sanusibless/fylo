@@ -74,7 +74,7 @@ class FileController extends Controller
                 return redirect()->back()->withErrors(['file' => 'File not found'])->withInput();
             }
             $url = storage_path(str_replace("/storage", 'app/public', $file->relative_path));
-            $file->increment('downloads');
+            $file->increaseDownloads();
             return response()->download($url);
         } catch(\Throwable $th) {
             GeneralService::generalLog("Error in FileController", $th);
