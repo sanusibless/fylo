@@ -91,7 +91,7 @@ const getFileColor = (type: string) => {
 };
 const shareFileFormSchema = z.object({
     file_uuid: z.string(),
-    receiver_email: z.string().email(),
+    receiver_email: z.string().email() || '',
 });
 
 
@@ -275,12 +275,16 @@ if (view === 'list') {
                             name="receiver_email"
                             render={({ field }) => (
                                 <>
-                                    <Label>Email</Label>
-                                        <Input
-                                        type="Email"
-                                        value={""}
-                                        onChange={(e) => field.onChange(e.target.files)}
-                                    />
+                                    <FormItem>
+                                        <FormLabel>Select a file to upload</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="text"
+                                                onChange={(e) => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
                                 </>
                             )}
                         />
