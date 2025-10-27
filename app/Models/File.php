@@ -19,13 +19,11 @@ class File extends Model
         });
     }
 
-/*************  ✨ Windsurf Command ⭐  *************/
     /**
      * Returns the size of the file in kilobytes (KB) as a 2 decimal place value.
      *
      * @return string
      */
-/*******  bb6e8b98-72f8-468e-83a4-bab4a527c04b  *******/
     public function getSizeInKBAttribute()
     {
         return round($this->size / 1024, 2) . "KB";

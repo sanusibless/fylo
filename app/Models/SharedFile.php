@@ -8,6 +8,13 @@ class SharedFile extends Model
 {
     protected $guarded = [];
 
+    public static function booted()
+    {
+        static::creating(function ($model) {
+            $model->uuid = (string) \Illuminate\Support\Str::orderedUuid();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

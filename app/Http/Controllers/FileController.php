@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileUploadRequest;
+use App\Http\Requests\ShareFileRequest;
 use App\Models\File;
 use App\Services\FileService;
 use App\Services\GeneralService;
@@ -80,5 +81,19 @@ class FileController extends Controller
             GeneralService::generalLog("Error in FileController", $th);
         }
         return redirect()->back()->withErrors(['file' => 'unable to download file'])->withInput();
+    }
+
+    public function shareFile(ShareFileRequest $request)
+    {
+        try {
+            $fileResponse = $this->fileService->shareFile(auth()->id(), $request->file_uuid, $request->receiver_email);
+            if($fileResponse['status']) {
+                return redirect()->back()->with('status', $fileResponse['message']);
+            }
+            return redirect()->back()->withErrors(['file' => $fileResponse['message'] ?? 'Unable to share file'])->withInput();
+        } catch(\Throwable $th) {
+            GeneralService::generalLog("Error in FileController", $th);
+        }
+        return redirect()->back()->withErrors(['file' => 'unable to share file'])->withInput();
     }
 }

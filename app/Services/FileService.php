@@ -2,6 +2,8 @@
 namespace App\Services;
 
 use App\Models\File;
+use App\Models\SharedFile;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -54,5 +56,30 @@ class FileService extends GeneralService
             $this->logError($th);
         }
         return $this->serviceResponse(false, "Unable to star file", null);
+    }
+
+    public function shareFile( $auth_id, $file_uuid, $user_email)
+    {
+        try {
+            $file = File::where('uuid', $file_uuid)->first();
+            $receiver_user = User::where("email", $user_email)->first();
+            if(!$file) {
+                return $this->serviceResponse(false, "File or User not found", null);
+            }
+            if(!$receiver_user) {
+                return $this->serviceResponse(false, "User not found", null);
+            }
+
+            SharedFile::create([
+                'file_id' => $file->id,
+                'user_id' => $auth_id,
+                'receiver_id' => $receiver_user->id
+            ]);
+            // send notification for receiving of email
+            return $this->serviceResponse(true, "File shared successfully", null);
+        } catch (\Throwable $th) {
+            $this->logError($th);
+        }
+        return $this->serviceResponse(false, "Unable to share file", null);
     }
 }

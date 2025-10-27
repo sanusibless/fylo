@@ -20,12 +20,16 @@ Route::get('/faqs', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::get('shared-files', [DashboardController::class, 'sharedFiles'])->name('shared_file');
     // File Upload
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
         Route::get('/{file_uuid}/favorite', [FileController::class, 'starringFile'])->name('toggle_favorite');
         Route::get('/{file_uuid}/download', [FileController::class, 'downloadFile'])->name('download');
+
+        // share files
+        Route::post('share', [FileController::class, 'shareFile'])->name('share');
+
     });
 
     Route::get('logs', [LogViewerController::class, 'index']);

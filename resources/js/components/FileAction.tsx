@@ -6,7 +6,29 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { is } from 'date-fns/locale';
-import { set } from 'zod';
+import z, { set } from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from './ui/input';
+import { DialogClose } from '@radix-ui/react-dialog';
 
 interface FileCardProps {
     file: {
@@ -22,43 +44,46 @@ interface FileCardProps {
     };
     action: 'download' | 'share' | 'delete' | 'star' | 'edit';
   }
+
+
 function FileAction({ file, action = 'star' } : FileCardProps) {
     const [isStarred, setIsStarred] = useState(file.is_favorite);
     const [showStar, setShowStar] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
-const handleStarringClick = async (e, fileUuid) => {
-    e.preventDefault()
-  
-    try {
-      setIsLoading(true);
-      setShowStar(false);
 
-      const response = await fetch(route('file.toggle_favorite', { file_uuid: fileUuid }), {
-        method: 'GET',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'Accept': 'application/json',
-        },
-      })
-  
-      const data = await response.json()
-      setIsStarred(data.starred);
-      setIsLoading(false);
-      setShowStar(true);
-      toast.success(data.starred ? 'Starred successfully' : 'Unstarred successfully')
+    const handleStarringClick = async (e, fileUuid) => {
+        e.preventDefault()
 
-    } catch (error) {
-      toast.error('Something went wrong')
-    } finally {
-      setIsLoading(false);
-      setShowStar(true);
+        try {
+        setIsLoading(true);
+        setShowStar(false);
+
+        const response = await fetch(route('file.toggle_favorite', { file_uuid: fileUuid }), {
+            method: 'GET',
+            headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            },
+        })
+
+        const data = await response.json()
+        setIsStarred(data.starred);
+        setIsLoading(false);
+        setShowStar(true);
+        toast.success(data.starred ? 'Starred successfully' : 'Unstarred successfully')
+
+        } catch (error) {
+        toast.error('Something went wrong')
+        } finally {
+        setIsLoading(false);
+        setShowStar(true);
+        }
     }
-}
 
-const handleDownload = (e, fileUuid) => {
-  window.location.href = route('file.download', { file_uuid: fileUuid });
-}
+    const handleDownload = (e, fileUuid) => {
+        window.location.href = route('file.download', { file_uuid: fileUuid });
+    }
 
   switch(action) {
     case 'download':
@@ -72,7 +97,7 @@ const handleDownload = (e, fileUuid) => {
             Download
         </Button>
       )
-    
+
       case 'delete':
         return (
           <Button
@@ -98,17 +123,35 @@ const handleDownload = (e, fileUuid) => {
           )
        case 'share':
         return (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => handleStarringClick(e, file.uuid)}
-          >
-            <Share2 className="mr-2 h-4 w-4" />
-                Share
-          </Button>
+          <>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Share
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Share this {file.name} with?</DialogTitle>
+                    </DialogHeader>
+                    <form
+                       onSubmit={form.handleSubmit(onSubmit)}
+                       className="space-y-4"
+                    >
+                        <DialogFooter>
+                            <Button type="submit">Share</Button>
+                            <DialogClose asChild>
+                                <Button type="button" variant="outline">Cancel</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+          </>
         )
-        
-        default: 
+
+        default:
           return (
             <Button
               variant="ghost"
@@ -122,4 +165,6 @@ const handleDownload = (e, fileUuid) => {
   }
 }
 
-export default FileAction
+export default FileAction;
+
+
