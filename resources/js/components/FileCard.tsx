@@ -49,7 +49,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@headlessui/react";
-import { Label } from "./ui/label";
+import AutoCompleteSearchInput from "./AutoCompleteSearchInput";
 
 interface FileCardProps {
   file: {
@@ -91,7 +91,7 @@ const getFileColor = (type: string) => {
 };
 const shareFileFormSchema = z.object({
     file_uuid: z.string(),
-    receiver_email: z.string().email() || '',
+    receiver_email: z.email() || '',
 });
 
 
@@ -104,7 +104,11 @@ export function FileCard({ file, view }: FileCardProps) {
   const form = useForm<z.infer<typeof shareFileFormSchema>>({
       resolver: zodResolver(shareFileFormSchema),
     });
-  
+
+  const handleSelectedUser = (value: string) => {
+    form.setValue('receiver_email', value || '');
+  };
+
   const onSubmit = async (values: z.infer<typeof shareFileFormSchema>) => {
     try {
                 // setIsSubmitting(true);
@@ -112,7 +116,7 @@ export function FileCard({ file, view }: FileCardProps) {
             onSuccess: () => {
                 // setIsSubmitting(false);
                 toast.success('File shared successfully');
-            },  
+            },
             onError: () => {
                 // setIsSubmitting(false);
                 toast.success('Unable to share file');
@@ -182,6 +186,42 @@ if (view === 'list') {
                 <DialogHeader>
                     <DialogTitle>Share this {file.name} with?</DialogTitle>
                 </DialogHeader>
+
+                <Form {...form}>
+                    <form>
+                            <FormField
+                                control={form.control}
+                                name="file_uuid"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Select a file to upload</FormLabel>
+                                    <FormControl>
+                                    <Input
+                                        type="hidden"
+                                        {...field}
+                                        value={file.uuid}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="receiver_email"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Select a file to upload</FormLabel>
+                                        <FormControl>
+                                            <AutoCompleteSearchInput onSelect={handleSelectedUser} value={field.value ?? ''}/>
+                                        </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                    </form>
+                </Form>
                         <DialogFooter>
                             <Button type="submit">Share</Button>
                             <DialogClose asChild>
@@ -257,12 +297,12 @@ if (view === 'list') {
                     //    onSubmit={form.handleSubmit(onSubmit)}
                     //    className="space-y-4"
                     >
-                        
+
                         <FormField
                         control={form.control}
                         name="file_uuid"
                         render={({ field }) => (
-                            
+
                                 <Input
                                 type="hidden"
                                 value={file.uuid}

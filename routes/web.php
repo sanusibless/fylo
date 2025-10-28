@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
@@ -21,6 +22,12 @@ Route::get('/faqs', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('shared-files', [DashboardController::class, 'sharedFiles'])->name('shared_file');
+
+    // routes/web.php
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/search', [UserController::class, 'search'])->name('search');
+    });
+
     // File Upload
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
