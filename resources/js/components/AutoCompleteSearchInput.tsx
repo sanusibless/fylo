@@ -12,14 +12,14 @@ interface User {
 
 interface AutoCompleteSearchInputProps {
     value : string,
-    onSelect : (e : string) => object,
+    onSelect : (value : string) => void,
 }
 
 export default function AutoCompleteSearchInput({ onSelect, value } : AutoCompleteSearchInputProps) {
   const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<null | User>(null);
+  // const [selected, setSelected] = useState<null | User>(null);
 
   // Debounce typing (optional but good UX)
   useEffect(() => {
@@ -40,10 +40,10 @@ export default function AutoCompleteSearchInput({ onSelect, value } : AutoComple
   }, [query]);
 
   const handleSelect = (user : User) => {
-    setSelected(user);
+    // setSelected(user);
     setQuery(user.name);
     setResults([]);
-    onSelect?.(user.email); // optional callback
+    onSelect(user.email); // optional callback
   };
 
   return (
@@ -58,15 +58,15 @@ export default function AutoCompleteSearchInput({ onSelect, value } : AutoComple
       {loading && <p className="text-xs text-gray-400 mt-1">Searching...</p>}
 
       {results.length > 0 && (
-        <Card className="absolute z-10 w-full mt-2 p-2 bg-white shadow-lg">
+        <Card className="z-10 w-full mt-2 p-2 bg-dark shadow-lg border-0 border-bottom">
           {results.map((user : User) => (
             <div
               key={user.id}
-              className="p-2 cursor-pointer hover:bg-gray-100 rounded"
+              className="p-2 cursor-pointer hover:bg-dark-100 rounded"
               onClick={() => handleSelect(user)}
             >
-                <div className='flex flex-col'>
-                    <span>{user.name}</span>
+                <div className='flex'>
+                    <span className="mr-2">{user.name}</span>
                     <span>({user.email})</span>
                 </div>
             </div>

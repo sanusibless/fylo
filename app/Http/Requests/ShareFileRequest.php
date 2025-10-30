@@ -22,8 +22,8 @@ class ShareFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_uuid' =>  ['required', 'exists:upload_files,uuid'],
-            'receiver_email' => ['required', 'email', 'exists:users,email', ],
+           'file_uuid' =>  ['required', 'exists:uploaded_files,uuid'],
+            'receiver_email' => ['required', 'email', 'exists:users,email'],
         ];
     }
 }

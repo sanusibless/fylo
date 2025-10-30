@@ -10,7 +10,8 @@ import {
   Share2,
   Star,
   Trash2,
-  Edit3
+  Edit3,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -100,30 +101,40 @@ export function FileCard({ file, view }: FileCardProps) {
   const FileIcon = getFileIcon(file.type);
   const iconColor = getFileColor(file.type);
   const [isShareOpen,setIsShareOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const form = useForm<z.infer<typeof shareFileFormSchema>>({
       resolver: zodResolver(shareFileFormSchema),
+      defaultValues: {
+        file_uuid: file.uuid,
+        receiver_email: '',
+      }
     });
 
   const handleSelectedUser = (value: string) => {
     form.setValue('receiver_email', value || '');
   };
 
-  const onSubmit = async (values: z.infer<typeof shareFileFormSchema>) => {
+  const onShareFileSubmit = (values: z.infer<typeof shareFileFormSchema>) => {
     try {
-                // setIsSubmitting(true);
+        console.log(values);
+        setIsProcessing(true);
         router.post(route('file.share'), values, {
             onSuccess: () => {
-                // setIsSubmitting(false);
+                setIsProcessing(false);
+                setIsShareOpen(false);
                 toast.success('File shared successfully');
             },
             onError: () => {
-                // setIsSubmitting(false);
+                setIsProcessing(false);
+                setIsShareOpen(false);
                 toast.success('Unable to share file');
             }
         })
     } catch(error) {
         console.log(error);
+        setIsProcessing(false);
+        setIsShareOpen(false);
         toast.error('Something went wrong')
     }
 }
@@ -175,26 +186,25 @@ if (view === 'list') {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <Dialog>
+        <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
             <DialogTrigger asChild>
                 <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
                     <Share2 className="mr-2 h-4 w-4" />
                             Share
                     </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent key="share-dialog">
                 <DialogHeader>
                     <DialogTitle>Share this {file.name} with?</DialogTitle>
                 </DialogHeader>
 
-                <Form {...form}>
-                    <form>
+               <Form {...form} >
+                    <form onSubmit={form.handleSubmit(onShareFileSubmit)}>
                             <FormField
                                 control={form.control}
                                 name="file_uuid"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Select a file to upload</FormLabel>
                                     <FormControl>
                                     <Input
                                         type="hidden"
@@ -212,22 +222,31 @@ if (view === 'list') {
                                 name="receiver_email"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Select a file to upload</FormLabel>
-                                        <FormControl>
-                                            <AutoCompleteSearchInput onSelect={handleSelectedUser} value={field.value ?? ''}/>
-                                        </FormControl>
+                                    <FormControl>
+                                        <AutoCompleteSearchInput onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                                 )}
                             />
+                            <div className="h-4 mt-4 flex justify-end">
+
+                                {isProcessing ?
+                                (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
+                                (<DialogFooter>
+                                    <Button type="submit">Share</Button>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                </DialogFooter>)
+                                }
+                            </div>
+
                     </form>
+
                 </Form>
-                        <DialogFooter>
-                            <Button type="submit">Share</Button>
-                            <DialogClose asChild>
-                                <Button type="button" variant="outline">Cancel</Button>
-                            </DialogClose>
-                        </DialogFooter>
+
+
             </DialogContent>
         </Dialog>
       </div>
@@ -289,54 +308,59 @@ if (view === 'list') {
       </CardContent>
     </Card>
     <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Share this {file.name} with?</DialogTitle>
-                    </DialogHeader>
-                    <form
-                    //    onSubmit={form.handleSubmit(onSubmit)}
-                    //    className="space-y-4"
-                    >
+            <DialogContent key="share-dialog">
+                <DialogHeader>
+                    <DialogTitle>Share this {file.name} with?</DialogTitle>
+                </DialogHeader>
 
-                        <FormField
-                        control={form.control}
-                        name="file_uuid"
-                        render={({ field }) => (
+               <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onShareFileSubmit)}>
+                            <FormField
+                                control={form.control}
+                                name="file_uuid"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                    <Input
+                                        type="hidden"
+                                        {...field}
+                                        value={file.uuid}
+                                    />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
 
-                                <Input
-                                type="hidden"
-                                value={file.uuid}
-                                onChange={(e) => field.onChange(e.target.files)}
-                                />
-                        )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="receiver_email"
-                            render={({ field }) => (
-                                <>
-                                    <FormItem>
-                                        <FormLabel>Select a file to upload</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="text"
-                                                onChange={(e) => field.onChange(e.target.value)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                </>
-                            )}
-                        />
-                        <DialogFooter>
-                            <Button type="submit">Share</Button>
-                            <DialogClose asChild>
-                                <Button type="button" variant="outline">Cancel</Button>
-                            </DialogClose>
-                        </DialogFooter>
+                            <FormField
+                                control={form.control}
+                                name="receiver_email"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <AutoCompleteSearchInput onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <div className="h-4 mt-4 flex justify-end">
+                                {isProcessing ?
+                                (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
+                                (<DialogFooter>
+                                    <Button type="submit">Share</Button>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                </DialogFooter>)
+                                }
+                            </div>
                     </form>
-                </DialogContent>
-    </Dialog>
+
+                </Form>
+
+            </DialogContent>
+        </Dialog>
         </>
   );
 }

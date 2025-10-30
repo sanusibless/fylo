@@ -70,13 +70,16 @@ class FileService extends GeneralService
                 return $this->serviceResponse(false, "User not found", null);
             }
 
-            SharedFile::create([
+            $shared_file = SharedFile::create([
                 'file_id' => $file->id,
                 'user_id' => $auth_id,
                 'receiver_id' => $receiver_user->id
             ]);
-            // send notification for receiving of email
-            return $this->serviceResponse(true, "File shared successfully", null);
+            if($shared_file) {
+
+                //TODO: you will send a email notification for shared filed
+                return $this->serviceResponse(true, "File shared successfully", null);
+            }
         } catch (\Throwable $th) {
             $this->logError($th);
         }
