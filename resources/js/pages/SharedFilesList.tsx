@@ -20,77 +20,21 @@ import EmptyState from "@/components/EmptyState";
 import { Link } from "@inertiajs/react";
 
 interface SharedFile {
-  file : {
-      id: string;
-      name: string;
-      type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
-      uuid: string;
-      size: string;
-      size_in_mb: number;
-      formatted_date: string;
-      is_favorite?: boolean;
-      thumbnail?: string;
-  }
-  sharedBy: { name: string; email: string };
-  sharedDate: string;
-}
 
-// const mockFiles: SharedFile[] = [
-//   {
-//     id: "1",
-//     name: "Project Proposal.pdf",
-//     type: "document",
-//     size: "2.4 MB",
-//     sharedWith: [
-//       { name: "Sarah Chen", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" },
-//       { name: "Mike Johnson", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" },
-//     ],
-//     sharedDate: "2024-03-15",
-//   },
-//   {
-//     id: "2",
-//     name: "Design Mockups.fig",
-//     type: "image",
-//     size: "15.8 MB",
-//     sharedWith: [
-//       { name: "Emma Wilson", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" },
-//     ],
-//     sharedDate: "2024-03-14",
-//   },
-//   {
-//     id: "3",
-//     name: "Product Demo.mp4",
-//     type: "video",
-//     size: "48.2 MB",
-//     sharedWith: [
-//       { name: "James Lee", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=James" },
-//       { name: "Lisa Park", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa" },
-//       { name: "Tom Brown", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tom" },
-//     ],
-//     sharedDate: "2024-03-13",
-//   },
-//   {
-//     id: "4",
-//     name: "Meeting Recording.mp3",
-//     type: "audio",
-//     size: "12.5 MB",
-//     sharedWith: [
-//       { name: "Alex Kim", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" },
-//     ],
-//     sharedDate: "2024-03-12",
-//   },
-//   {
-//     id: "5",
-//     name: "Budget Spreadsheet.xlsx",
-//     type: "other",
-//     size: "856 KB",
-//     sharedWith: [
-//       { name: "Rachel Green", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rachel" },
-//       { name: "Ross Geller", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ross" },
-//     ],
-//     sharedDate: "2024-03-11",
-//   },
-// ];
+    file : {
+        id: string;
+        name: string;
+        type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
+        uuid: string;
+        size: string;
+        size_in_mb: number;
+        formatted_date: string;
+        is_favorite?: boolean;
+        thumbnail?: string;
+    }
+    sharedBy: { name: string; email: string };
+    sharedDate: string;
+}
 
 const getFileIcon = (type: SharedFile["file"]["type"]) => {
   const iconProps = { className: "w-5 h-5" };
@@ -119,7 +63,7 @@ interface SharedFileItemProps {
 
 const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filesShared] = useState<SharedFile[]>(sharedFiles);
+  const [filesShared] = useState<SharedFile[]>(sharedFiles.data);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   console.log(sharedFiles);
@@ -235,16 +179,16 @@ const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
                         </tbody>
                         </table>
                     </div>
-                    <div className="flex justify-center mt-6 space-x-2">
-                    {filesShared.links.map((link, i) => (
+                    <div className="flex justify-end m-3 space-x-2 ">
+                    {sharedFiles.links.map((link, i) => (
                     <Link
                         key={i}
                         href={link.url || '#'}
                         preserveScroll
                         className={`px-3 py-1 text-sm border rounded ${
                         link.active
-                            ? 'bg-primary text-white border-primary'
-                            : 'hover:bg-gray-100'
+                            ? 'bg-blue-400 text-white'
+                            : 'hover:bg-gray-400 hover:text-white'
                         } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />

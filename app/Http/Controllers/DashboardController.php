@@ -43,16 +43,17 @@ class DashboardController extends Controller
                     'totalUsed' => auth()->user()->totalStorageUsed(),
                     'availableStorage' => auth()->user()->storagePlan->storagePlanDetail,
                 ],
-                'sharedFiles' => collect($auth->sharedFiles)->map(function ($sharedFile) {
-                    return  [
-                        "sharedBy" => [
-                            "name" => $sharedFile->user->name,
-                            "email" => $sharedFile->user->email
-                        ],
-                        "file" =>  $sharedFile->file,
-                        "sharedDate" => $sharedFile->created_at
-                    ];
-                }),
+                'sharedFiles' => $auth->sharedFiles()
+                ->with(['user']) // eager load
+                ->paginate(20)
+                ->through(fn($sharedFile) => [
+                    "sharedBy" => [
+                        "name" => $sharedFile->user->name,
+                        "email" => $sharedFile->user->email,
+                    ],
+                    "file" => $sharedFile->file,
+                    "sharedDate" => $sharedFile->created_at,
+                ])
             ]);
         } catch (Throwable $th) {
             GeneralService::staticLog("Error", [
