@@ -36,4 +36,10 @@ class GeneralService
             ["" => $data 
         ]);
     }
+
+    public static function staticLog($message, $data)
+    {
+        Log::warning($message, 
+        ["" => $data ]);
+    }
 }

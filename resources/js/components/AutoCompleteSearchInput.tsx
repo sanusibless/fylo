@@ -41,7 +41,7 @@ export default function AutoCompleteSearchInput({ onSelect, value } : AutoComple
 
   const handleSelect = (user : User) => {
     // setSelected(user);
-    setQuery(user.name);
+    setQuery(user.email);
     setResults([]);
     onSelect(user.email); // optional callback
   };

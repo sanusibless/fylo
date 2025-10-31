@@ -73,8 +73,9 @@ class User extends Authenticatable
 
     public function sharedFiles()
     {
-        return $this->hasMany(SharedFile::class);
+        return $this->hasMany(SharedFile::class, 'receiver_id', 'id');
     }
+
 
     public function totalSharedFiles()
     {

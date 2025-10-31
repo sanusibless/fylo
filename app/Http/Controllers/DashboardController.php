@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FileService;
 use App\Services\GeneralService;
 use Illuminate\Http\Request;
+use Throwable;
 
 class DashboardController extends Controller
 {
@@ -26,20 +27,37 @@ class DashboardController extends Controller
         ]);
     }
 
-    
 
-    // public function getSharedFiles(GeneralService $generalService, $id)
-    // {
-    //     try {
 
-    //         $auth = auth()->user();
+    public function getSharedFiles()
+    {
+        try {
+            $auth = auth()->user();
+            $files = auth()->user()->files();
 
-    //         return inertia('SharedFiles',[
-    //             'sharedFiles' => $auth->sharedFiles()->where('shared_file_id', $id)->get(),
-    //         ]);
-
-    //     } catch (Throwable $th) {
-
-    //     }
-    // }
+            return inertia('SharedFilesList',[
+                'recentFiles' => $files->orderByDesc("created_at")->take(20)->get(),
+                'totalFiles' => $files->count(),
+                'totalShared' =>  auth()->user()->totalSharedFiles(),
+                'storage' => [
+                    'totalUsed' => auth()->user()->totalStorageUsed(),
+                    'availableStorage' => auth()->user()->storagePlan->storagePlanDetail,
+                ],
+                'sharedFiles' => collect($auth->sharedFiles)->map(function ($sharedFile) {
+                    return  [
+                        "sharedBy" => [
+                            "name" => $sharedFile->user->name,
+                            "email" => $sharedFile->user->email
+                        ],
+                        "file" =>  $sharedFile->file,
+                        "sharedDate" => $sharedFile->created_at
+                    ];
+                }),
+            ]);
+        } catch (Throwable $th) {
+            GeneralService::staticLog("Error", [
+                "" => $th
+            ]);
+        }
+    }
 }

@@ -8,6 +8,8 @@ class SharedFile extends Model
 {
     protected $guarded = [];
 
+    protected $with = ['file', 'user'];
+
     public static function booted()
     {
         static::creating(function ($model) {
@@ -22,6 +24,6 @@ class SharedFile extends Model
 
     public function file()
     {
-        return $this->hasOne(File::class);
+        return $this->hasOne(File::class, 'id', 'file_id');
     }
 }

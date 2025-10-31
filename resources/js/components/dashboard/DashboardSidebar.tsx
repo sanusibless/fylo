@@ -1,17 +1,13 @@
-import { useState } from "react";
+
 import {
   Files,
   FolderOpen,
   Users,
-  Settings,
-  Upload,
   Trash2,
   Star,
   Clock,
   HardDrive,
-  Menu,
   X,
-  Route
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +20,7 @@ const navigation = [
   { name: "All Files", href: "/dashboard", icon: Files },
   { name: "Recent", href: "/recent", icon: Clock },
   { name: "Starred", href: "/starred", icon: Star },
-  { name: "Shared", href: "/shared", icon: Users },
+  { name: "Shared", href: route('shared_files'), icon: Users },
   { name: "Folders", href: "/folders", icon: FolderOpen },
   { name: "Trash", href: "/trash", icon: Trash2 },
 ];
