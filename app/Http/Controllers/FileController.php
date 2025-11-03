@@ -96,4 +96,18 @@ class FileController extends Controller
         }
         return redirect()->back()->withErrors(['file' => 'unable to share file'])->withInput();
     }
+
+    public function deleteFile($file_uuid)
+    {
+        try {
+            $fileResponse = $this->fileService->deleteFile(auth()->id(), $file_uuid);
+            if($fileResponse['status']) {
+                return redirect()->back()->with('status', $fileResponse['message']);
+            }
+            return redirect()->back()->withErrors(['file' => $fileResponse['message'] ?? 'Unable to delete file'])->withInput();
+        } catch(\Throwable $th) {
+            GeneralService::generalLog("Error in FileController", $th);
+        }
+        return redirect()->back()->withErrors(['file' => 'unable to delete file'])->withInput();
+    }
 }

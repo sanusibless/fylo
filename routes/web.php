@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
         Route::get('/{file_uuid}/favorite', [FileController::class, 'starringFile'])->name('toggle_favorite');
         Route::get('/{file_uuid}/download', [FileController::class, 'downloadFile'])->name('download');
+        Route::get('/{file_uuid}/delete', [FileController::class, 'deleteFile'])->name('delete');
 
         // share files
         Route::post('share', [FileController::class, 'shareFile'])->name('share');

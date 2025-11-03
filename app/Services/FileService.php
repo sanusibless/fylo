@@ -5,6 +5,7 @@ use App\Models\File;
 use App\Models\SharedFile;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class FileService extends GeneralService
@@ -47,7 +48,7 @@ class FileService extends GeneralService
             $file->update([
                 'is_favorite' => !$file->is_favorite
             ]);
-            
+
             return $this->serviceResponse(true, "", [
                 'starred' => $file->is_favorite,
                 'message' => $file->is_favorite ? "File starred successfully" : "File unstarred successfully"
@@ -84,5 +85,27 @@ class FileService extends GeneralService
             $this->logError($th);
         }
         return $this->serviceResponse(false, "Unable to share file", null);
+    }
+
+    public function deleteFile($auth_id, $file_uuid)
+    {
+        try {
+            DB::beginTransaction();
+            $file = File::where('uuid', $file_uuid)->first();
+            if(!$file) {
+                return $this->serviceResponse(false, "File not found", null);
+            }
+            if($file->user_id == $auth_id) {
+                $file->delete();
+                Storage::disk('public')->delete($file->relative_path);
+                DB::commit();
+                return $this->serviceResponse(true, "File deleted successfully", null);
+            }
+            return $this->serviceResponse(false, "You don't have permission to delete this file", null);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            $this->logError($th);
+        }
+        return $this->serviceResponse(false, "Unable to delete file", null);
     }
 }

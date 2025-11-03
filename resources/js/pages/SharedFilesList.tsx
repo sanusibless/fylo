@@ -58,7 +58,7 @@ interface SharedFileItemProps {
     totalUsed: number | string;
     totalAvailable: number | string;
   };
-  
+
 }
 
 const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
@@ -134,10 +134,10 @@ const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
                                         className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors"
                                     >
                                 <td className="py-4 px-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
-                                    <span className="font-medium text-foreground truncate">{file.name}</span>
-                                </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
+                                        <span className="font-medium text-foreground truncate">{file.name}</span>
+                                    </div>
                                 </td>
                                 <td className="py-4 px-6 hidden md:table-cell">
                                 <div className="flex flex-col justify-center -space-x-2">
@@ -156,7 +156,7 @@ const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
                                 })}
                                 </td>
                                 <td className="py-4 px-6 text-white">
-                                <DropdownMenu>
+                                    <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="ghost" size="sm">
                                                 <MoreVertical className="h-4 w-4" />

@@ -51,6 +51,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@headlessui/react";
 import AutoCompleteSearchInput from "./AutoCompleteSearchInput";
+import { type } from './../../../vendor/tightenco/ziggy/src/js/index.d';
+
 
 interface FileCardProps {
   file: {
@@ -95,12 +97,18 @@ const shareFileFormSchema = z.object({
     receiver_email: z.email() || '',
 });
 
+const deleteFileFormSchema = z.object({
+    file_uuid: z.string(),
+    confirmation_text: z.literal("delete")
+});
+
 
 export function FileCard({ file, view }: FileCardProps) {
   // const [isStarred, setIsStarred] = useState(file.is_favorite || false);
   const FileIcon = getFileIcon(file.type);
   const iconColor = getFileColor(file.type);
   const [isShareOpen,setIsShareOpen] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const form = useForm<z.infer<typeof shareFileFormSchema>>({
@@ -110,10 +118,18 @@ export function FileCard({ file, view }: FileCardProps) {
         receiver_email: '',
       }
     });
+ const deleteForm = useForm<z.infer<typeof deleteFileFormSchema>>({
+    resolver: zodResolver(deleteFileFormSchema),
+    defaultValues: {
+      file_uuid: file.uuid,
+      confirmation_text: "delete"
+    }
+  });
 
   const handleSelectedUser = (value: string) => {
     form.setValue('receiver_email', value || '');
   };
+
 
   const onShareFileSubmit = (values: z.infer<typeof shareFileFormSchema>) => {
     try {
@@ -138,6 +154,28 @@ export function FileCard({ file, view }: FileCardProps) {
         toast.error('Something went wrong')
     }
 }
+  const onDeleteFile = (values: z.infer<typeof deleteFileFormSchema>) => {
+    try {
+        setIsProcessing(true);
+        router.delete(route('file.delete', values.file_uuid), {
+            onSuccess: () => {
+                setIsProcessing(false);
+                setOpenDeleteModal(false);
+                toast.success('File deleted successfully');
+            },
+            onError: () => {
+                setIsProcessing(false);
+                setOpenDeleteModal(false);
+                toast.error('Unable to delete file');
+            }
+        })
+    } catch(error) {
+        console.log(error);
+        setIsProcessing(false);
+        setOpenDeleteModal(false);
+        toast.error('Something went wrong')
+    }
+  }
 if (view === 'list') {
     return (
       <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group">
@@ -182,6 +220,10 @@ if (view === 'list') {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive">
                 <FileAction file={file} action="delete" />
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setOpenDeleteModal(true); }}>
+                <Trash2 className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -241,12 +283,66 @@ if (view === 'list') {
                                 </DialogFooter>)
                                 }
                             </div>
-
                     </form>
-
                 </Form>
+            </DialogContent>
+        </Dialog>
 
+        <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
+            <DialogTrigger asChild>
+                <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+            </DialogTrigger>
+            <DialogContent key="share-dialog" className="">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to delete this file, {file.name}?</DialogTitle>
+                </DialogHeader>
 
+               <Form {...deleteForm}>
+                    <form onSubmit={deleteForm.handleSubmit(onDeleteFile)}>
+                            <FormField
+                                control={form.control}
+                                name="file_uuid"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            type="hidden"
+                                            {...field}
+                                            value={file.uuid}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={deleteForm.control}
+                                name="confirmation_text"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input  className="w-full border rounded" type="text" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <div className="h-4 mt-4 flex justify-end">
+                                {isProcessing ?
+                                (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
+                                (<DialogFooter>
+                                    <Button type="submit" disabled={deleteForm.watch("confirmation_text") !== "delete"} className="bg-red-500 text-white hover:bg-red-600">Delete</Button>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                </DialogFooter>)
+                                }
+                            </div>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
       </div>
