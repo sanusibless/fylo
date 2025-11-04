@@ -122,7 +122,7 @@ export function FileCard({ file, view }: FileCardProps) {
     resolver: zodResolver(deleteFileFormSchema),
     defaultValues: {
       file_uuid: file.uuid,
-      confirmation_text: "delete"
+      confirmation_text: ""
     }
   });
 
