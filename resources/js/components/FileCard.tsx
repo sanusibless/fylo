@@ -457,6 +457,63 @@ if (view === 'list') {
 
             </DialogContent>
         </Dialog>
+        <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
+            <DialogTrigger asChild>
+                <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
+            </DialogTrigger>
+            <DialogContent key="share-dialog" className="">
+                <DialogHeader>
+                    <DialogTitle>Are you sure you want to delete this file, {file.name}?</DialogTitle>
+                </DialogHeader>
+
+               <Form {...deleteForm}>
+                    <form onSubmit={deleteForm.handleSubmit(onDeleteFile)}>
+                            <FormField
+                                control={form.control}
+                                name="file_uuid"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input
+                                            type="hidden"
+                                            {...field}
+                                            value={file.uuid}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={deleteForm.control}
+                                name="confirmation_text"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Input  className="w-full border rounded" type="text" {...field} value={field.value ?? ''} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <div className="h-4 mt-4 flex justify-end">
+                                {isProcessing ?
+                                (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
+                                (<DialogFooter>
+                                    <Button type="submit" disabled={deleteForm.watch("confirmation_text") !== "delete"} className="bg-red-500 text-white hover:bg-red-600">Delete</Button>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="outline">Cancel</Button>
+                                    </DialogClose>
+                                </DialogFooter>)
+                                }
+                            </div>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
         </>
   );
 }
