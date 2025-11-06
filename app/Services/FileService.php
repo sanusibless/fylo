@@ -87,6 +87,47 @@ class FileService extends GeneralService
         return $this->serviceResponse(false, "Unable to share file", null);
     }
 
+    public function updateFile($auth_id, $file_uuid, $name) {
+        try {
+            $file = File::where('uuid', $file_uuid)->first();
+            if(!$file) {
+                return $this->serviceResponse(false, "File not found", null);
+            }
+            if($file->user_id == $auth_id) {
+                $former_name = $file->name;
+                $file_extension = explode(".", $former_name)[1];
+                $new_name = str()->slug($name) . "." . $file_extension;
+
+                $new_relative_path = str_replace($former_name, $new_name, $file->relative_path);
+                $new_full_path = str_replace($former_name, $new_name, $file->full_path);
+
+                $file_path = str_replace("/storage", "", $file->relative_path);
+                
+                $new_file_path = "/uploads"  . "/$new_name";
+
+                if(Storage::disk('public')->exists($file_path)) {
+                    if(Storage::disk('public')->move($file_path, $new_file_path)) {
+                        $this->log("File moved successfully",[
+                        ]);
+                        Storage::disk('public')->delete($file_path);
+
+                    };
+                }
+
+                $file->update([
+                    'name' => $new_name,
+                    'relative_path' => $new_relative_path,
+                    'full_path' => $new_full_path
+                ]);
+
+                return $this->serviceResponse(true, "File name updated successfully", null);
+            }
+            return $this->serviceResponse(false, "You don't have permission to update this file", null);
+        } catch (\Throwable $th) {
+            $this->logError($th);
+        }
+    }
+
     public function deleteFile($auth_id, $file_uuid)
     {
         try {

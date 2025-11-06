@@ -11,7 +11,8 @@ import {
   Star,
   Trash2,
   Edit3,
-  Loader2
+  Loader2,
+  Edit2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -102,6 +103,13 @@ const deleteFileFormSchema = z.object({
     confirmation_text: z.literal("delete")
 });
 
+const EditForm = z.object({
+    file_uuid: z.string(),
+    name: z.string().min(3, {
+      message: 'Name must be at least 3 characters long',
+    })
+  });
+
 
 export function FileCard({ file, view }: FileCardProps) {
   // const [isStarred, setIsStarred] = useState(file.is_favorite || false);
@@ -109,6 +117,7 @@ export function FileCard({ file, view }: FileCardProps) {
   const iconColor = getFileColor(file.type);
   const [isShareOpen,setIsShareOpen] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const form = useForm<z.infer<typeof shareFileFormSchema>>({
@@ -130,6 +139,35 @@ export function FileCard({ file, view }: FileCardProps) {
     form.setValue('receiver_email', value || '');
   };
 
+ const editForm = useForm({
+        resolver: zodResolver(EditForm),
+        defaultValues: {
+            file_uuid: file.uuid,
+            name: file.name,
+        },
+    });
+
+    const onEditFileSubmit = async (values : z.infer<typeof EditForm>) => {
+
+        try {
+        setIsProcessing(true);
+            router.put(route('file.update', { file_uuid: values.file_uuid }), values, {
+                onSuccess: () => {
+                setIsProcessing(false);
+                    toast.success('File updated successfully');
+                },
+                onError: () => {
+                setIsProcessing(false);
+                    toast.error('Unable to update file');
+                }
+            })
+        } catch(error) {
+            console.log(error);
+            setIsProcessing(false);
+            toast.error('Something went wrong')
+        }
+    }
+
 
   const onShareFileSubmit = (values: z.infer<typeof shareFileFormSchema>) => {
     try {
@@ -138,19 +176,19 @@ export function FileCard({ file, view }: FileCardProps) {
         router.post(route('file.share'), values, {
             onSuccess: () => {
                 setIsProcessing(false);
-                setIsShareOpen(false);
+                setIsEditOpen(false);
                 toast.success('File shared successfully');
             },
             onError: () => {
                 setIsProcessing(false);
-                setIsShareOpen(false);
+                setIsEditOpen(false);
                 toast.success('Unable to share file');
             }
         })
     } catch(error) {
         console.log(error);
         setIsProcessing(false);
-        setIsShareOpen(false);
+        setIsEditOpen(false);
         toast.error('Something went wrong')
     }
 }
@@ -345,6 +383,49 @@ if (view === 'list') {
                 </Form>
             </DialogContent>
         </Dialog>
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogTrigger asChild>
+                <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3"> 
+                    <Edit2 className="mr-2 h-4 w-4" />
+                        Edit
+                </Button>
+            </DialogTrigger>
+            <DialogContent key="share-dialog">
+                <DialogHeader>
+                    <DialogTitle>Edit {file.name}</DialogTitle>
+                </DialogHeader>
+
+                <Form {...editForm} >
+                    <form
+                       onSubmit={editForm.handleSubmit(onEditFileSubmit)}
+                       className="space-y-4"
+                    >
+                        <FormField
+                            control={editForm.control}
+                            name="name"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input {...field} value={field.value ?? ''} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        {isProcessing ?
+                        (<Loader2 className="flex justify-end w-4 h-4 animate-spin text-gray-600" />) : (
+                            <DialogFooter>
+                                <Button type="submit">Save</Button>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline">Cancel</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        )}
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>   
       </div>
     );
   }
@@ -456,8 +537,8 @@ if (view === 'list') {
                 </Form>
 
             </DialogContent>
-        </Dialog>
-        <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
+    </Dialog>
+    {/* <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
             <DialogTrigger asChild>
                 <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
                     <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -513,7 +594,7 @@ if (view === 'list') {
                     </form>
                 </Form>
             </DialogContent>
-        </Dialog>
+        </Dialog> */}
         </>
   );
 }

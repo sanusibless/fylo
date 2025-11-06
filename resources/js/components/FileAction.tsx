@@ -43,7 +43,9 @@ interface FileCardProps {
       thumbnail?: string;
     };
     action: 'download' | 'share' | 'delete' | 'star' | 'edit';
-  }
+}
+
+
 
 
 function FileAction({ file, action = 'star' } : FileCardProps) {
@@ -85,7 +87,9 @@ function FileAction({ file, action = 'star' } : FileCardProps) {
         window.location.href = route('file.download', { file_uuid: fileUuid });
     }
 
-  switch(action) {
+
+
+    switch(action) {
     case 'download':
       return (
         <Button
@@ -112,14 +116,7 @@ function FileAction({ file, action = 'star' } : FileCardProps) {
 
         case 'edit':
           return (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => handleStarringClick(e, file.uuid)}
-            >
-                <Edit2 className="mr-2 h-4 w-4" />
-                Rename
-            </Button>
+            <></>
           )
        case 'share':
         return (

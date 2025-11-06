@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EditFileNameRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\ShareFileRequest;
 use App\Models\File;
@@ -95,6 +96,23 @@ class FileController extends Controller
             GeneralService::generalLog("Error in FileController", $th);
         }
         return redirect()->back()->withErrors(['file' => 'unable to share file'])->withInput();
+    }
+
+    public function updateFile(EditFileNameRequest $request, $file_uuid)
+    {
+        try {
+            $fileResponse = $this->fileService->updateFile(auth()->id(), $file_uuid, $request->name);
+            GeneralService::staticLog("file name", [
+                'name' => $request->name
+            ]);
+            if($fileResponse['status']) {
+                return redirect()->back()->with('status', $fileResponse['message']);
+            }
+            return redirect()->back()->withErrors(['file' => $fileResponse['message'] ?? 'Unable to update file name'])->withInput();
+        } catch(\Throwable $th) {
+            GeneralService::generalLog("Error in FileController", $th);
+        }
+        return redirect()->back()->withErrors(['file' => 'unable to update file name'])->withInput();
     }
 
     public function deleteFile($file_uuid)

@@ -31,8 +31,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // File Upload
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
+        Route::delete('/{file_uuid}/delete', [FileController::class, 'deleteFile'])->name('delete');
         Route::get('/{file_uuid}/favorite', [FileController::class, 'starringFile'])->name('toggle_favorite');
         Route::get('/{file_uuid}/download', [FileController::class, 'downloadFile'])->name('download');
+        Route::put('/{file_uuid}/update', [FileController::class, 'updateFile'])->name('update');
         Route::delete('/{file_uuid}/delete', [FileController::class, 'deleteFile'])->name('delete');
 
         // share files
