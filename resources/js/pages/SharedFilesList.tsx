@@ -66,10 +66,10 @@ const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
   const [filesShared] = useState<SharedFile[]>(sharedFiles.data);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  console.log(sharedFiles);
+  console.log(filesShared);
 
-  const filteredFiles = filesShared.filter((filesShared) =>
-    filesShared.file.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFiles = filesShared.filter((fileShared) =>
+    fileShared.file?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
   );
 
   const handleAction = (action: string, fileName: string) => {
@@ -85,122 +85,125 @@ const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
           <div className="flex-1 flex flex-col lg:ml-0">
             <DashboardHeader onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
                 <div className="min-h-screen">
-                <div className="container mx-auto px-4 py-8">
-                    {/* Header */}
-                    <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Shared Files</h1>
-                    <p className="text-muted-foreground">Manage your shared documents and media</p>
-                    </div>
+                    <div className="container mx-auto px-4 py-8">
+                        {/* Header */}
+                        <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-foreground mb-2">Shared Files</h1>
+                        <p className="text-muted-foreground">Manage your shared documents and media</p>
+                        </div>
 
-                    {/* Search */}
-                    <div className="mb-6">
-                    <div className="relative max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                        type="text"
-                        placeholder="Search files..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                        />
-                    </div>
-                    </div>
+                        {/* Search */}
+                        <div className="mb-6">
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                            type="text"
+                            placeholder="Search files..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10"
+                            />
+                        </div>
+                        </div>
 
-                    {/* Files List */}
-                    <div className=" rounded-lg border border-border overflow-hidden shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-border ">
-                            <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Name</th>
-                            <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden md:table-cell">
-                                Shared By
-                            </th>
-                            <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden sm:table-cell">
-                                Size
-                            </th>
-                            <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden lg:table-cell">
-                                Date Shared
-                            </th>
-                            <th className="w-12 py-4 px-6">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredFiles.length > 0 && filteredFiles.map((sharedFile) => {
-                                const { file, sharedDate, sharedBy } = sharedFile;
-                                return (
-                                    <tr
-                                        key={file.id}
-                                        className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors"
-                                    >
-                                <td className="py-4 px-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
-                                        <span className="font-medium text-foreground truncate">{file.name}</span>
+                        {/* Files List */}
+                        <div className=" rounded-lg border border-border overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-border ">
+                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Name</th>
+                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden md:table-cell">
+                                    Shared By
+                                </th>
+                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden sm:table-cell">
+                                    Size
+                                </th>
+                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden lg:table-cell">
+                                    Date Shared
+                                </th>
+                                <th className="w-12 py-4 px-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredFiles.length > 0 && filteredFiles.map((sharedFile) => {
+                                    const { file, sharedDate, sharedBy } = sharedFile;
+                                    return (
+                                        <tr
+                                            key={file.id}
+                                            className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors"
+                                        >
+                                    <td className="py-4 px-6">
+
+                                                <div className="flex items-center gap-3">
+                                                <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
+                                                <span className="font-medium text-foreground truncate">{file.name}</span>
+                                                </div>
+
+
+                                    </td>
+                                    <td className="py-4 px-6 hidden md:table-cell">
+                                    <div className="flex flex-col justify-center -space-x-2">
+                                        <span className="text-muted-foreground">{sharedBy.name}</span>
+                                        <span className="text-muted-foreground text-xs">({sharedBy.email})</span>
                                     </div>
-                                </td>
-                                <td className="py-4 px-6 hidden md:table-cell">
-                                <div className="flex flex-col justify-center -space-x-2">
-                                    <span className="text-muted-foreground">{sharedBy.name}</span>
-                                    <span className="text-muted-foreground text-xs">({sharedBy.email})</span>
-                                </div>
-                                </td>
-                                <td className="py-4 px-6 text-sm text-muted-foreground hidden sm:table-cell">
-                                {file.size}
-                                </td>
-                                <td className="py-4 px-6 text-sm text-muted-foreground hidden lg:table-cell">
-                                {new Date(sharedDate).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
+                                    </td>
+                                    <td className="py-4 px-6 text-sm text-muted-foreground hidden sm:table-cell">
+                                    {file.size}
+                                    </td>
+                                    <td className="py-4 px-6 text-sm text-muted-foreground hidden lg:table-cell">
+                                    {new Date(sharedDate).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                    })}
+                                    </td>
+                                    <td className="py-4 px-6 text-white">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="sm">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>
+                                            <FileAction file={file} action="download" />
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-destructive">
+                                                <FileAction file={file} action="delete" />
+                                            </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </td>
+                                </tr>
+                                    )
                                 })}
-                                </td>
-                                <td className="py-4 px-6 text-white">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="sm">
-                                                <MoreVertical className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>
-                                        <FileAction file={file} action="download" />
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-destructive">
-                                            <FileAction file={file} action="delete" />
-                                        </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </td>
-                            </tr>
-                                )
-                            })}
-                        </tbody>
-                        </table>
+                            </tbody>
+                            </table>
+                        </div>
+                        <div className="flex justify-end m-3 space-x-2 ">
+                        {sharedFiles.links.map((link, i) => (
+                        <Link
+                            key={i}
+                            href={link.url || '#'}
+                            preserveScroll
+                            className={`px-3 py-1 text-sm border rounded ${
+                            link.active
+                                ? 'bg-blue-400 text-white'
+                                : 'hover:bg-gray-400 hover:text-white'
+                            } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                        ))}
                     </div>
-                    <div className="flex justify-end m-3 space-x-2 ">
-                    {sharedFiles.links.map((link, i) => (
-                    <Link
-                        key={i}
-                        href={link.url || '#'}
-                        preserveScroll
-                        className={`px-3 py-1 text-sm border rounded ${
-                        link.active
-                            ? 'bg-blue-400 text-white'
-                            : 'hover:bg-gray-400 hover:text-white'
-                        } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                    ))}
-                </div>
-                    </div>
+                        </div>
 
-                    {/* Empty State */}
-                    {filteredFiles.length === 0 && (
-                    <EmptyState message="No shared files found" />
-                    )}
-                </div>
+                    {/* // Empty State */}
+                        {filteredFiles.length === 0 && (
+                        <EmptyState message="No shared files found" />
+                        )}
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

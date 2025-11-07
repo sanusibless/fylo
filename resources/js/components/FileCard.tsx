@@ -115,6 +115,11 @@ const removeExtension = (fileName: string) => {
     return fileName.split('.')[0];
 }
 
+const shortFileName = (fileName: string) => {
+    const name = removeExtension(fileName);
+    return name.length > 20 ? `${name.substring(0, 20)}...` : name;
+}
+
 
 export function FileCard({ file, view }: FileCardProps) {
   // const [isStarred, setIsStarred] = useState(file.is_favorite || false);
@@ -227,7 +232,7 @@ export function FileCard({ file, view }: FileCardProps) {
             <div className="flex items-center space-x-3">
             <FileIcon className={cn("h-5 w-5", iconColor)} />
             <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+                <p className="text-sm font-medium text-foreground truncate">{shortFileName(file.name)}</p>
                 <p className="text-xs text-muted-foreground">{file.formatted_date}</p>
             </div>
             </div>
@@ -246,6 +251,7 @@ export function FileCard({ file, view }: FileCardProps) {
                 <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
             </Button> */}
             <FileAction file={file} action="star" />
+            <FileAction file={file} action="download" view="list" />
             {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -481,7 +487,7 @@ export function FileCard({ file, view }: FileCardProps) {
             </div>
             </div>
             <div className="space-y-1">
-            <h3 className="font-medium text-sm text-foreground truncate">{file.name}</h3>
+            <h3 className="font-medium text-sm text-foreground truncate">{shortFileName(file.name)}</h3>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{file.size_in_mb}</span>
                 <span className="flex items-center space-x-2 text-xs text-muted-foreground">{file.total_downloads} download(s)</span>

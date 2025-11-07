@@ -43,12 +43,13 @@ interface FileCardProps {
       thumbnail?: string;
     };
     action: 'download' | 'share' | 'delete' | 'star' | 'edit';
+    view :   null | 'list' | 'grid'
 }
 
 
 
 
-function FileAction({ file, action = 'star' } : FileCardProps) {
+function FileAction({ file, action = 'star', view = 'grid' } : FileCardProps) {
     const [isStarred, setIsStarred] = useState(file.is_favorite);
     const [showStar, setShowStar] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +99,7 @@ function FileAction({ file, action = 'star' } : FileCardProps) {
           onClick={(e) => handleDownload(e, file.uuid)}
         >
             <Download className="mr-2 h-4 w-4" />
-            Download
+            { view === 'grid' && 'Download' }
         </Button>
       )
 
@@ -110,7 +111,8 @@ function FileAction({ file, action = 'star' } : FileCardProps) {
             onClick={(e) => handleStarringClick(e, file.uuid)}
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            { view === 'grid' && 'Delete' }
+
           </Button>
         )
 
@@ -125,7 +127,8 @@ function FileAction({ file, action = 'star' } : FileCardProps) {
                 <DialogTrigger asChild>
                     <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
                         <Share2 className="mr-2 h-4 w-4" />
-                        Share
+                        { view === 'grid' && 'Share' }
+
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
