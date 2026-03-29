@@ -121,7 +121,7 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
               <span>{totalUsed} GB used</span>
               <span>{totalAvailable} GB total</span>
             </div>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button className="bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[hsl(200,77%,54%)]/90">
               Upgrade Plan
             </Button>
           </div>

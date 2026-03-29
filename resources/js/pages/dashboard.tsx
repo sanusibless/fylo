@@ -27,52 +27,52 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
     'storage': storage
   })
 
-  const mockFiles = [
-    {
-      id: "1",
-      name: "Project-Presentation.pptx",
-      type: "document" as const,
-      size: "2.4 MB",
-      modifiedAt: "2 hours ago",
-      isStarred: true,
-    },
-    {
-      id: "2",
-      name: "Team-Photo.jpg",
-      type: "image" as const,
-      size: "1.8 MB",
-      modifiedAt: "1 day ago",
-    },
-    {
-      id: "3",
-      name: "Demo-Video.mp4",
-      type: "video" as const,
-      size: "24.5 MB",
-      modifiedAt: "3 days ago",
-    },
-    {
-      id: "4",
-      name: "Background-Music.mp3",
-      type: "audio" as const,
-      size: "5.2 MB",
-      modifiedAt: "1 week ago",
-    },
-    {
-      id: "5",
-      name: "Archive-Backup.zip",
-      type: "archive" as const,
-      size: "156 MB",
-      modifiedAt: "2 weeks ago",
-      isStarred: true,
-    },
-    {
-      id: "6",
-      name: "Budget-Report.xlsx",
-      type: "document" as const,
-      size: "890 KB",
-      modifiedAt: "3 weeks ago",
-    },
-  ];
+//   const mockFiles = [
+//     {
+//       id: "1",
+//       name: "Project-Presentation.pptx",
+//       type: "document" as const,
+//       size: "2.4 MB",
+//       modifiedAt: "2 hours ago",
+//       isStarred: true,
+//     },
+//     {
+//       id: "2",
+//       name: "Team-Photo.jpg",
+//       type: "image" as const,
+//       size: "1.8 MB",
+//       modifiedAt: "1 day ago",
+//     },
+//     {
+//       id: "3",
+//       name: "Demo-Video.mp4",
+//       type: "video" as const,
+//       size: "24.5 MB",
+//       modifiedAt: "3 days ago",
+//     },
+//     {
+//       id: "4",
+//       name: "Background-Music.mp3",
+//       type: "audio" as const,
+//       size: "5.2 MB",
+//       modifiedAt: "1 week ago",
+//     },
+//     {
+//       id: "5",
+//       name: "Archive-Backup.zip",
+//       type: "archive" as const,
+//       size: "156 MB",
+//       modifiedAt: "2 weeks ago",
+//       isStarred: true,
+//     },
+//     {
+//       id: "6",
+//       name: "Budget-Report.xlsx",
+//       type: "document" as const,
+//       size: "890 KB",
+//       modifiedAt: "3 weeks ago",
+//     },
+//   ];
 
   return (
     <DashboardLayout title="Dashboard">

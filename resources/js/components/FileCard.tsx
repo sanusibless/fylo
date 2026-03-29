@@ -230,54 +230,19 @@ export function FileCard({ file, view }: FileCardProps) {
         return (
         <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group">
             <div className="flex items-center space-x-3">
-            <FileIcon className={cn("h-5 w-5", iconColor)} />
-            <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground truncate">{shortFileName(file.name)}</p>
-                <p className="text-xs text-muted-foreground">{file.formatted_date}</p>
+                <FileIcon className={cn("h-5 w-5", iconColor)} />
+                <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{shortFileName(file.name)}</p>
+                    <p className="text-xs text-muted-foreground">{file.formatted_date}</p>
+                </div>
             </div>
-            </div>
-            <div className="flex items-center space-x-2">
-            <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
-            <span className="flex items-center space-x-2 text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
-            {/* <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleStarringClick(e, file.uuid)}
-                className={cn(
-                "opacity-0 group-hover:opacity-100 transition-opacity",
-                isStarred && "opacity-100 text-yellow-500"
-                )}
-            >
-                <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
-            </Button> */}
-            <FileAction file={file} action="star" />
-            <FileAction file={file} action="download" view="list" />
-            {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical className="h-4 w-4" />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                <FileAction file={file} action="download" />
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsShareOpen(true); }}>
-                    <Share2 className="mr-2 h-4 w-4" /> Share
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                <FileAction file={file} action="edit" />
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive">
-                    <FileAction file={file} action="delete" />
-                </DropdownMenuItem>
-
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setOpenDeleteModal(true); }}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu> */}
+            <div className="flex justify-end space-x-2">
+                <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
+                <span className="flex text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
+                <div className="flex justify-end">
+                    <FileAction file={file} action="star" />
+                    <FileAction file={file} action="download" view="list" />
+                </div>
             </div>
             <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
                 <DialogTrigger asChild>

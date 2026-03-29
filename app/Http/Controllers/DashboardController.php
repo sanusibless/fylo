@@ -22,7 +22,7 @@ class DashboardController extends Controller
             'totalShared' =>  auth()->user()->totalSharedFiles(),
             'storage' => [
                 'totalUsed' => auth()->user()->totalStorageUsed(),
-                'availableStorage' => auth()->user()->storagePlan->storagePlanDetail,
+                'availableStorage' => auth()->user()?->storagePlan?->storagePlanDetail,
             ]
         ]);
     }
