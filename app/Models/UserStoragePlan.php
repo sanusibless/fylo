@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserStoragePlan extends Model
 {
-    protected $storage = ['id'];
+    protected $guarded = ['id'];
 
     public function user()
     {
