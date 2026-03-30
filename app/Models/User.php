@@ -51,7 +51,7 @@ class User extends Authenticatable
     protected static function booted()
     {
         parent::boot();
-        static::creating(function ($user) {
+        static::created(function ($user) {
             UserStoragePlan::create(['user_id' => $user->id, 'storage_plan_id' => 1]);
         });
     }
