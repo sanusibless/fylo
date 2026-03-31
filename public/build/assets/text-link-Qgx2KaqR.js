@@ -1,1 +1,0 @@
-import{j as n,L as o}from"./app-CNK53LKM.js";function i({href:t,children:e,className:r=""}){return n.jsx(o,{href:t,className:`text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-150 ${r}`,children:e})}export{i as T};
