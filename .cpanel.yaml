@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/beeteckc/public_html/fylo.beeteck.com.ng
+    - /bin/cp -R * $DEPLOYPATH
