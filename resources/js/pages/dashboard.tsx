@@ -95,9 +95,9 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
               <p className="text-white/90 mb-6">
                 Manage your files, collaborate with your team, and stay productive.
               </p>
-                <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+                {/* <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
                     Explore Features
-                </Button>
+                </Button> */}
             </div>
           </div>
 
