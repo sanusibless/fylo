@@ -84,7 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{file_uuid}/update', [FileController::class, 'updateFile'])->name('update');
         Route::delete('/{file_uuid}/delete', [FileController::class, 'deleteFile'])->name('delete');
 
-        // share files
+        // share files ##
         Route::post('share', [FileController::class, 'shareFile'])->name('share');
 
     });
