@@ -14,6 +14,7 @@ import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout";
 import useAuth from "@/hooks/use-auth";
 import { react } from '@vitejs/plugin-react';
 import EmptyState from "@/components/EmptyState";
+import FileTable from "@/components/FileTable";
 
 
 
@@ -154,9 +155,10 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {recentFiles.map((file) => (
+                      {/* {recentFiles.map((file) => (
                         <FileCard key={file.uuid} file={file} view="list" />
-                      ))}
+                      ))} */}
+                      <FileTable files={recentFiles} />
                     </div>
                   )}
                 </CardContent>

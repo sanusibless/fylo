@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Upload } from "lucide-react";
+import { LoaderCircle, Upload } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -57,22 +57,25 @@ const formSchema = z.object({
 
 export default function UploadFile() {
   const [openUploadFile, setOpenUploadFile] = useState(false);
+  const [isLoading, setIsloading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    
+
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-
+    setIsloading(true);
     const file = values.file[0];
     router.post(route("file.upload"), { file }, {
         onSuccess: () => {
             setOpenUploadFile(false)
             form.reset();
             toast.success("File uploaded successfully");
+            setIsloading(false);
         },
         onError: (errors) => {
+            setIsloading(false);
             setOpenUploadFile(true)
             if (errors.file) {
                 toast.error(errors.file);
@@ -113,6 +116,7 @@ export default function UploadFile() {
                   <FormLabel>Select a file to upload</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={isLoading}
                       type="file"
                       accept=".jpg,.png,.pdf"
                       onChange={(e) => field.onChange(e.target.files)}
@@ -122,17 +126,28 @@ export default function UploadFile() {
                 </FormItem>
               )}
             />
-
             <DialogFooter>
-              <Button type="submit">Upload</Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setOpenUploadFile(false)}
-              >
-                Cancel
-              </Button>
+             {
+                 !isLoading ? (
+                     <div className="flex items-center justify-end space-x-2">
+                         <Button type="submit">Upload</Button>
+                         <Button
+                             type="button"
+                             variant="secondary"
+                             onClick={() => setOpenUploadFile(false)}
+                         >
+                             Cancel
+                         </Button>
+                     </div>
+
+                ) :
+                <div className="flex items-center justify-end">
+                    <LoaderCircle className="h-5 w-5 animate-spin justify-end text-[hsl(185,77%,54%)]/80" />
+                </div>
+
+            }
             </DialogFooter>
+
           </form>
         </Form>
       </DialogContent>

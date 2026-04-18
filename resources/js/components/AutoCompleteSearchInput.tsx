@@ -15,7 +15,7 @@ interface AutoCompleteSearchInputProps {
     onSelect : (value : string) => void,
 }
 
-export default function AutoCompleteSearchInput({ onSelect, value } : AutoCompleteSearchInputProps) {
+export default function AutoCompleteSearchInput({ onSelect, value, disabled = false } : AutoCompleteSearchInputProps) {
   const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,6 +50,7 @@ export default function AutoCompleteSearchInput({ onSelect, value } : AutoComple
     <div className="relative w-full">
       <Input
         type="text"
+        disabled={disabled}
         placeholder="Search user..."
         value={query ?? ''}
         onChange={(e) => setQuery(e.target.value)}

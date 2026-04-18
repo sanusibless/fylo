@@ -24,7 +24,7 @@ export default function HomeLayout({ title, children }: { title : string, childr
                 <section className="bg-[#1c2431] text-white">
                 {children}
                 </section>
-                <ChatWidget />
+                {/* <ChatWidget /> */}
                 <footer className="bg-[#0b1523] text-gray-400 px-6 py-16">
                             <div className="max-w-6xl mx-auto">
                             <img src="images/logo.svg" alt="Fylo Logo" className="mb-6 w-32" />

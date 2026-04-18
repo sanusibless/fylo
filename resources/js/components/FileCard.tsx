@@ -56,7 +56,7 @@ import { type } from './../../../vendor/tightenco/ziggy/src/js/index.d';
 import { confirm } from './../routes/password/index';
 
 
-interface FileCardProps {
+export interface FileCardProps {
   file: {
     id: string;
     name: string;
@@ -73,7 +73,7 @@ interface FileCardProps {
   view: 'grid' | 'list';
 }
 
-const getFileIcon = (type: string) => {
+export const getFileIcon = (type: string) => {
   switch (type) {
     case 'document': return FileText;
     case 'image': return Image;
@@ -84,7 +84,7 @@ const getFileIcon = (type: string) => {
   }
 };
 
-const getFileColor = (type: string) => {
+export const getFileColor = (type: string) => {
   switch (type) {
     case 'document': return 'text-blue-400';
     case 'image': return 'text-green-400';
@@ -111,11 +111,11 @@ const EditForm = z.object({
     })
 });
 
-const removeExtension = (fileName: string) => {
+export const removeExtension = (fileName: string) => {
     return fileName.split('.')[0];
 }
 
-const shortFileName = (fileName: string) => {
+export const shortFileName = (fileName: string) => {
     const name = removeExtension(fileName);
     return name.length > 20 ? `${name.substring(0, 20)}...` : name;
 }
@@ -256,7 +256,7 @@ export function FileCard({ file, view }: FileCardProps) {
                     </DialogHeader>
 
                 <Form {...form} >
-                        <form onSubmit={form.handleSubmit(onShareFileSubmit)}>
+                        <form onSubmit={form.handleSubmit(onShareFileSubmit)} className="mb-3">
                                 <FormField
                                     control={form.control}
                                     name="file_uuid"
@@ -286,15 +286,18 @@ export function FileCard({ file, view }: FileCardProps) {
                                     </FormItem>
                                     )}
                                 />
-                                <div className="h-4 mt-4 flex justify-end">
+                                <div className="h-4 flex justify-end space-x-2">
 
                                     {isProcessing ?
-                                    (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
-                                    (<DialogFooter>
-                                        <Button type="submit">Share</Button>
-                                        <DialogClose asChild>
-                                            <Button type="button" variant="outline">Cancel</Button>
-                                        </DialogClose>
+                                    (<Loader2 className="w-5 h-5 animate-spin text-[hsl(185,77%,54%)]/80" />) :
+                                    (<DialogFooter className="">
+                                        <div className="mb-3">
+                                            <Button type="submit">Share</Button>
+                                            <DialogClose asChild>
+                                                <Button type="button" variant="outline">Cancel</Button>
+                                            </DialogClose>
+                                        </div>
+
                                     </DialogFooter>)
                                     }
                                 </div>
@@ -391,7 +394,7 @@ export function FileCard({ file, view }: FileCardProps) {
                                 )}
                             />
                             {isProcessing ?
-                            (<Loader2 className="flex justify-end w-4 h-4 animate-spin text-gray-600" />) : (
+                            (<Loader2 className="flex justify-end w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />) : (
                                 <DialogFooter>
                                     <Button type="submit">Save</Button>
                                     <DialogClose asChild>
@@ -467,7 +470,7 @@ export function FileCard({ file, view }: FileCardProps) {
                             <DialogTitle>Share this {file.name} with?</DialogTitle>
                         </DialogHeader>
 
-                    <Form {...form}>
+                        <Form {...form}>
                             <form onSubmit={form.handleSubmit(onShareFileSubmit)}>
                                     <FormField
                                         control={form.control}
@@ -492,16 +495,16 @@ export function FileCard({ file, view }: FileCardProps) {
                                         render={({ field }) => (
                                         <FormItem>
                                             <FormControl>
-                                                <AutoCompleteSearchInput onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
+                                                <AutoCompleteSearchInput disabled={isProcessing} onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                         )}
                                     />
-                                    <div className="h-4 mt-4 flex justify-end">
+                                    <div className="h-4 mt-4 flex justify-end mb-2">
                                         {isProcessing ?
-                                        (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
-                                        (<DialogFooter>
+                                        (<Loader2 className="w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />) :
+                                        (<DialogFooter className="space-x-2 mb-4">
                                             <Button type="submit">Share</Button>
                                             <DialogClose asChild>
                                                 <Button type="button" variant="outline">Cancel</Button>
@@ -510,7 +513,6 @@ export function FileCard({ file, view }: FileCardProps) {
                                         }
                                     </div>
                             </form>
-
                         </Form>
 
                     </DialogContent>
@@ -539,15 +541,19 @@ export function FileCard({ file, view }: FileCardProps) {
                                     </FormItem>
                                     )}
                                 />
+                                <div className="flex justify-end">
                                 {isProcessing ?
-                                (<Loader2 className="flex justify-end w-4 h-4 animate-spin text-gray-600" />) : (
-                                    <DialogFooter>
-                                        <Button type="submit">Save</Button>
-                                        <DialogClose asChild>
-                                            <Button type="button" variant="outline">Cancel</Button>
-                                        </DialogClose>
-                                    </DialogFooter>
-                                )}
+                                    (<Loader2 className="w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />)
+                                    : (
+                                        <DialogFooter>
+                                            <Button type="submit">Save</Button>
+                                            <DialogClose asChild>
+                                                <Button type="button" variant="outline">Cancel</Button>
+                                            </DialogClose>
+                                        </DialogFooter>
+                                    )}
+                                </div>
+
                             </form>
                         </Form>
                     </DialogContent>
