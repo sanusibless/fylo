@@ -18,7 +18,7 @@ import FileTable from "@/components/FileTable";
 
 
 
-export default function Dashboard({ totalFiles, totalShared, downloads, recentFiles, storage }) {
+export default function Dashboard({ totalFiles, totalShared, downloads, recentFiles, storage, recentActivities}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const user  = useAuth();
@@ -168,7 +168,7 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
             {/* Sidebar Content */}
             <div className="space-y-6">
               <QuickActions />
-              <RecentActivity />
+              <RecentActivity activities={recentActivities} />
             </div>
           </div>
         </main>

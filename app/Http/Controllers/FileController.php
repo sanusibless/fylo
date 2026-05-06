@@ -54,7 +54,7 @@ class FileController extends Controller
             if(request()->expectsJson()) {
                 return response()->json([
                     'error' => $fileResponse['message'] ?? 'Unable to set as favourite file'
-                ]. 400);
+                ], 400);
             }
             return redirect()->back()->withErrors(['error' => $fileResponse['message'] ?? 'Unable to set as favourite file']);
         } catch(\Throwable $th) {
@@ -63,7 +63,7 @@ class FileController extends Controller
         if(request()->expectsJson()) {
             return response()->json([
                 'error' => 'Unable to set as favourite file'
-            ]. 422);
+            ], 422);
         }
         return redirect()->back()->withErrors(['file' => 'unable to upload file'])->withInput();
     }
@@ -77,6 +77,7 @@ class FileController extends Controller
             }
             $url = storage_path(str_replace("/storage", 'app/public', $file->relative_path));
             $file->increaseDownloads();
+            activity()->causedBy(auth()->id())->log("You downloaded {$file->name}");
             return response()->download($url);
         } catch(\Throwable $th) {
             GeneralService::generalLog("Error in FileController", $th);

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\FileService;
 use App\Services\GeneralService;
 use Illuminate\Http\Request;
+use Spatie\Activitylog\Models\Activity;
 use Throwable;
 
 class DashboardController extends Controller
@@ -20,6 +22,11 @@ class DashboardController extends Controller
             'recentFiles' => $files->orderByDesc("created_at")->take(20)->get(),
             'totalFiles' => $files->count(),
             'totalShared' =>  auth()->user()->totalSharedFiles(),
+            'recentActivities' => Activity::where('causer_id', auth()->id())
+                ->where('causer_type', User::class)
+                ->latest()
+                ->take(5)
+                ->get(),
             'storage' => [
                 'totalUsed' => auth()->user()->totalStorageUsed(),
                 'availableStorage' => auth()->user()?->storagePlan?->storagePlanDetail,
@@ -39,6 +46,7 @@ class DashboardController extends Controller
                 'recentFiles' => $files->orderByDesc("created_at")->take(20)->get(),
                 'totalFiles' => $files->count(),
                 'totalShared' =>  auth()->user()->totalSharedFiles(),
+
                 'storage' => [
                     'totalUsed' => auth()->user()->totalStorageUsed(),
                     'availableStorage' => auth()->user()?->storagePlan?->storagePlanDetail,

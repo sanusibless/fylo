@@ -31,6 +31,7 @@ class FileService extends GeneralService
             'full_path' => $base_url . "/storage" . "/$filePath",
                 'relative_path' => "/storage/$filePath"
             ]);
+            activity()->causedBy($user_id)->log("You uploaded {$fileName}");
             return $this->serviceResponse(true, "File Uploaded successfully", null);
         } catch (\Throwable $th) {
             $this->logError($th);
@@ -48,6 +49,8 @@ class FileService extends GeneralService
             $file->update([
                 'is_favorite' => !$file->is_favorite
             ]);
+
+            activity()->causedBy(auth()->id())->log("You set {$file->name} as " . ($file->is_favorite ? 'favourite' : 'unfavourite' ) . " file");
 
             return $this->serviceResponse(true, "", [
                 'starred' => $file->is_favorite,
@@ -77,6 +80,7 @@ class FileService extends GeneralService
                 'receiver_id' => $receiver_user->id
             ]);
             if($shared_file) {
+                activity()->causedBy(auth()->id())->log("You shared {$file->name} with $receiver_user->name");
 
                 //TODO: you will send a email notification for shared filed
                 return $this->serviceResponse(true, "File shared successfully", null);
@@ -102,7 +106,7 @@ class FileService extends GeneralService
                 $new_full_path = str_replace($former_name, $new_name, $file->full_path);
 
                 $file_path = str_replace("/storage", "", $file->relative_path);
-                
+
                 $new_file_path = "/uploads"  . "/$new_name";
 
                 if(Storage::disk('public')->exists($file_path)) {
@@ -119,6 +123,8 @@ class FileService extends GeneralService
                     'relative_path' => $new_relative_path,
                     'full_path' => $new_full_path
                 ]);
+
+                activity()->causedBy(auth()->id())->log("You renamed {$former_name} to {$new_name}");
 
                 return $this->serviceResponse(true, "File name updated successfully", null);
             }
@@ -137,9 +143,11 @@ class FileService extends GeneralService
                 return $this->serviceResponse(false, "File not found", null);
             }
             if($file->user_id == $auth_id) {
+                $file_name = $file->name;
                 $file->delete();
                 Storage::disk('public')->delete($file->relative_path);
                 DB::commit();
+                activity()->causedBy(auth()->id())->log("You deleted {$file_name}");
                 return $this->serviceResponse(true, "File deleted successfully", null);
             }
             return $this->serviceResponse(false, "You don't have permission to delete this file", null);
