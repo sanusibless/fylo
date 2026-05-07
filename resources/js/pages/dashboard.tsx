@@ -92,7 +92,7 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
               />
             </div>
             <div className="relative p-8 text-white">
-              <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+              {/* <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1> */}
               <p className="text-white/90 mb-6">
                 Manage your files, collaborate with your team, and stay productive.
               </p>
