@@ -103,7 +103,7 @@ export default function Dashboard({ totalFiles, totalShared, downloads, recentFi
           </div>
 
           {/* Stats Cards */}
-          <StatsCards totalFiles={totalFiles} sharedFiles={totalShared} storageUsed={storage.totalUsed} downloads={downloads} />
+          {/* <StatsCards totalFiles={totalFiles} sharedFiles={totalShared} storageUsed={storage.totalUsed} downloads={downloads} /> */}
 
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-4 gap-8">
