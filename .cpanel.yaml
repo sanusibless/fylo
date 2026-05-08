@@ -1,8 +1,8 @@
 ---
 deployment:
   tasks:
-    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && composer install --no-dev
-    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && php artisan migrate --force
-    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && php artisan optimize:clear
-    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && npm install --production
-    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && npm run build
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && /usr/local/bin/php ~/bin/composer install --no-dev
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && /usr/local/bin/php artisan migrate --force
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && /usr/local/bin/php artisan optimize:clear
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && ~/.nvm/versions/node/v24.14.1/bin/npm install
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && ~/.nvm/versions/node/v24.14.1/bin/npm run build
