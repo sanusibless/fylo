@@ -1,10 +1,8 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/beeteckc/public_html/fylo.beeteck.com.ng
-    - /bin/cp -R public/* $DEPLOYPATH
-    - cd $DEPLOYPATH && composer install --no-dev
-    - cd $DEPLOYPATH && php artisan migrate --force
-    - cd $DEPLOYPATH && php artisan optimize:clear
-    - cd $DEPLOYPATH && npm install --production
-    - cd $DEPLOYPATH && npm run build
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && composer install --no-dev
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && php artisan migrate --force
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && php artisan optimize:clear
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && npm install --production
+    - cd /home/beeteckc/public_html/fylo.beeteck.com.ng && npm run build
