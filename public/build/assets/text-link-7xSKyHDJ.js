@@ -1,0 +1,1 @@
+import{j as s,L as l}from"./app-BGA5eVJ0.js";function i({href:t,children:e,className:o="",tabIndex:n}){const r=typeof t=="object"&&t!==null&&"url"in t?t.url:t;return s.jsx(l,{href:r,tabIndex:n,className:`text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-150 ${o}`,children:e})}export{i as T};

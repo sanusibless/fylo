@@ -1,4 +1,9 @@
-export default function HeadingSmall({ title, description }) {
+interface HeadingSmallProps {
+    title: string;
+    description?: string;
+}
+
+export default function HeadingSmall({ title, description }: HeadingSmallProps) {
     return (
         <div className="mb-6">
             <h3 className="text-lg font-medium text-gray-900">

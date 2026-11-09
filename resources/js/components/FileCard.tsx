@@ -8,11 +8,9 @@ import {
   MoreVertical,
   Download,
   Share2,
-  Star,
   Trash2,
-  Edit3,
+  Edit2,
   Loader2,
-  Edit2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,53 +22,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogTrigger,
-  } from "@/components/ui/dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import FileAction from "./FileAction";
-import { download } from './../routes/file/index';
 import { DialogClose } from "@radix-ui/react-dialog";
-import { is } from 'date-fns/locale';
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-  } from "@/components/ui/form";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import z from "zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@headlessui/react";
+import { Input } from "@/components/ui/input";
 import AutoCompleteSearchInput from "./AutoCompleteSearchInput";
-import { type } from './../../../vendor/tightenco/ziggy/src/js/index.d';
-import { confirm } from './../routes/password/index';
-
+import { type FileItem } from "@/types";
 
 export interface FileCardProps {
-  file: {
-    id: string;
-    name: string;
-    type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
-    uuid: string;
-    size: string;
-    size_in_mb: number;
-    formatted_date: string;
-    total_downloads: string;
-    is_favorite?: boolean;
-    thumbnail?: string;
-
-  };
-  view: 'grid' | 'list';
+  file: FileItem;
+  view?: 'grid' | 'list';
+  isTrash?: boolean;
 }
 
 export const getFileIcon = (type: string) => {
@@ -94,525 +76,453 @@ export const getFileColor = (type: string) => {
     default: return 'text-muted-foreground';
   }
 };
+
+export const removeExtension = (fileName: string) => {
+  const parts = fileName.split('.');
+  if (parts.length > 1) {
+    parts.pop();
+    return parts.join('.');
+  }
+  return fileName;
+};
+
+export const shortFileName = (fileName: string) => {
+  const name = removeExtension(fileName);
+  return name.length > 24 ? `${name.substring(0, 24)}...` : name;
+};
+
 const shareFileFormSchema = z.object({
-    file_uuid: z.string(),
-    receiver_email: z.email() || '',
+  file_uuid: z.string(),
+  receiver_email: z.string().email("Please enter a valid email address"),
 });
 
 const deleteFileFormSchema = z.object({
-    file_uuid: z.string(),
-    confirmation_text: z.literal("delete")
+  file_uuid: z.string(),
+  confirmation_text: z.string().refine((val) => val.toLowerCase() === "delete", {
+    message: "Type 'delete' to confirm",
+  }),
 });
 
-const EditForm = z.object({
-    file_uuid: z.string(),
-    name: z.string().min(3, {
-      message: 'Name must be at least 3 characters long',
-    })
+const editFileFormSchema = z.object({
+  file_uuid: z.string(),
+  name: z.string().min(1, "Name cannot be empty").max(255),
 });
 
-export const removeExtension = (fileName: string) => {
-    return fileName.split('.')[0];
-}
+export function FileCard({ file, view = 'grid', isTrash = false }: FileCardProps) {
+  const FileIcon = getFileIcon(file.type);
+  const iconColor = getFileColor(file.type);
 
-export const shortFileName = (fileName: string) => {
-    const name = removeExtension(fileName);
-    return name.length > 20 ? `${name.substring(0, 20)}...` : name;
-}
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
+  const shareForm = useForm<z.infer<typeof shareFileFormSchema>>({
+    resolver: zodResolver(shareFileFormSchema),
+    defaultValues: {
+      file_uuid: file.uuid,
+      receiver_email: '',
+    },
+  });
 
-export function FileCard({ file, view }: FileCardProps) {
-  // const [isStarred, setIsStarred] = useState(file.is_favorite || false);
+  const deleteForm = useForm<z.infer<typeof deleteFileFormSchema>>({
+    resolver: zodResolver(deleteFileFormSchema),
+    defaultValues: {
+      file_uuid: file.uuid,
+      confirmation_text: '',
+    },
+  });
 
-    const FileIcon = getFileIcon(file.type);
-    const iconColor = getFileColor(file.type);
-    const [isShareOpen,setIsShareOpen] = useState(false);
-    const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [isEditOpen, setIsEditOpen] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+  const editForm = useForm<z.infer<typeof editFileFormSchema>>({
+    resolver: zodResolver(editFileFormSchema),
+    defaultValues: {
+      file_uuid: file.uuid,
+      name: removeExtension(file.name),
+    },
+  });
 
-    const form = useForm<z.infer<typeof shareFileFormSchema>>({
-        resolver: zodResolver(shareFileFormSchema),
-        defaultValues: {
-            file_uuid: file.uuid,
-            receiver_email: '',
-        }
-        });
-    const deleteForm = useForm<z.infer<typeof deleteFileFormSchema>>({
-        resolver: zodResolver(deleteFileFormSchema),
-        defaultValues: {
-        file_uuid: file.uuid,
-        confirmation_text: ""
-        }
-    });
-
-    const handleSelectedUser = (value: string) => {
-        form.setValue('receiver_email', value || '');
-    };
-
-    const editForm = useForm({
-        resolver: zodResolver(EditForm),
-        defaultValues: {
-            file_uuid: file.uuid,
-            name: removeExtension(file.name),
-        },
-    });
-
-    const onEditFileSubmit = async (values : z.infer<typeof EditForm>) => {
-
-        try {
-            setIsProcessing(true);
-            router.put(route('file.update', { file_uuid: values.file_uuid }), values, {
-                onSuccess: () => {
-                    setIsProcessing(false);
-                    setIsEditOpen(false);
-                    toast.success('File updated successfully');
-                },
-                onError: () => {
-                    setIsProcessing(false);
-                    setIsEditOpen(false);
-                    toast.error('Unable to update file');
-                }
-            })
-        } catch(error) {
-            console.log(error);
-            setIsProcessing(false);
-            toast.error('Something went wrong');
-        }
-    }
-
-    const onShareFileSubmit = (values: z.infer<typeof shareFileFormSchema>) => {
-    try {
-        console.log(values);
-        setIsProcessing(true);
-        router.post(route('file.share'), values, {
-            onSuccess: () => {
-                setIsProcessing(false);
-                setIsEditOpen(false);
-                toast.success('File shared successfully');
-            },
-            onError: () => {
-                setIsProcessing(false);
-                setIsEditOpen(false);
-                toast.success('Unable to share file');
-            }
-        })
-    } catch(error) {
-        console.log(error);
+  const onEditFileSubmit = (values: z.infer<typeof editFileFormSchema>) => {
+    setIsProcessing(true);
+    router.put(route('file.update', { file_uuid: values.file_uuid }), values, {
+      onSuccess: () => {
         setIsProcessing(false);
         setIsEditOpen(false);
-        toast.error('Something went wrong')
-    }
-    }
-    const onDeleteFile = (values: z.infer<typeof deleteFileFormSchema>) => {
-        try {
-            setIsProcessing(true);
-            router.delete(route('file.delete', values.file_uuid), {
-                onSuccess: () => {
-                    setIsProcessing(false);
-                    setOpenDeleteModal(false);
-                    toast.success('File deleted successfully');
-                },
-                onError: () => {
-                    setIsProcessing(false);
-                    setOpenDeleteModal(false);
-                    toast.error('Unable to delete file');
-                }
-            })
-        } catch(error) {
-            console.log(error);
-            setIsProcessing(false);
-            setOpenDeleteModal(false);
-            toast.error('Something went wrong')
-        }
-    }
-    if (view === 'list') {
-        return (
-        <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group">
-            <div className="flex items-center space-x-3">
-                <FileIcon className={cn("h-5 w-5", iconColor)} />
-                <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{shortFileName(file.name)}</p>
-                    <p className="text-xs text-muted-foreground">{file.formatted_date}</p>
-                </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-                <span className="text-xs text-muted-foreground">{file.size_in_mb}</span>
-                <span className="flex text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
-                <div className="flex justify-end">
-                    <FileAction file={file} action="star" />
-                    <FileAction file={file} action="download" view="list" />
-                </div>
-            </div>
-            <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-                <DialogTrigger asChild>
-                    <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
-                        <Share2 className="mr-2 h-4 w-4" />
-                        </Button>
-                </DialogTrigger>
-                <DialogContent key="share-dialog">
-                    <DialogHeader>
-                        <DialogTitle>Share this {file.name} with?</DialogTitle>
-                    </DialogHeader>
+        toast.success('File renamed successfully');
+      },
+      onError: (errors: any) => {
+        setIsProcessing(false);
+        toast.error(errors.name || errors.file || 'Unable to update file');
+      },
+    });
+  };
 
-                <Form {...form} >
-                        <form onSubmit={form.handleSubmit(onShareFileSubmit)} className="mb-3">
-                                <FormField
-                                    control={form.control}
-                                    name="file_uuid"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                        <Input
-                                            type="hidden"
-                                            {...field}
-                                            value={file.uuid}
-                                        />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
+  const onShareFileSubmit = (values: z.infer<typeof shareFileFormSchema>) => {
+    setIsProcessing(true);
+    router.post(route('file.share'), values, {
+      onSuccess: () => {
+        setIsProcessing(false);
+        setIsShareOpen(false);
+        shareForm.reset();
+        toast.success('File shared successfully');
+      },
+      onError: (errors: any) => {
+        setIsProcessing(false);
+        toast.error(errors.receiver_email || errors.file || 'Unable to share file');
+      },
+    });
+  };
 
-                                <FormField
-                                    control={form.control}
-                                    name="receiver_email"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <AutoCompleteSearchInput onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-                                <div className="h-4 flex justify-end space-x-2">
+  const onDeleteFile = (values: z.infer<typeof deleteFileFormSchema>) => {
+    setIsProcessing(true);
+    router.delete(route('file.delete', { file_uuid: values.file_uuid }), {
+      onSuccess: () => {
+        setIsProcessing(false);
+        setOpenDeleteModal(false);
+        deleteForm.reset();
+        toast.success('File moved to Trash');
+      },
+      onError: (errors: any) => {
+        setIsProcessing(false);
+        toast.error(errors.file || 'Unable to delete file');
+      },
+    });
+  };
 
-                                    {isProcessing ?
-                                    (<Loader2 className="w-5 h-5 animate-spin text-[hsl(185,77%,54%)]/80" />) :
-                                    (<DialogFooter className="">
-                                        <div className="mb-3">
-                                            <Button type="submit">Share</Button>
-                                            <DialogClose asChild>
-                                                <Button type="button" variant="outline">Cancel</Button>
-                                            </DialogClose>
-                                        </div>
-
-                                    </DialogFooter>)
-                                    }
-                                </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
-                <DialogTrigger asChild>
-                    <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                    </Button>
-                </DialogTrigger>
-                <DialogContent key="share-dialog" className="">
-                    <DialogHeader>
-                        <DialogTitle>Are you sure you want to delete this file, {file.name}?</DialogTitle>
-                    </DialogHeader>
-
-                <Form {...deleteForm}>
-                        <form onSubmit={deleteForm.handleSubmit(onDeleteFile)}>
-                                <FormField
-                                    control={form.control}
-                                    name="file_uuid"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-xs mb-2">Enter 'delete' to confirm deletion</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="hidden"
-                                                {...field}
-                                                value={file.uuid}
-                                                placeholder="Enter 'delete' to confirm deletion"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={deleteForm.control}
-                                    name="confirmation_text"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Input  className="w-full border rounded" type="text" {...field} value={field.value ?? ''} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-                                <div className="h-4 mt-4 flex justify-end">
-                                    {isProcessing ?
-                                    (<Loader2 className="w-4 h-4 animate-spin text-gray-600" />) :
-                                    (<DialogFooter>
-                                        <Button type="submit" disabled={deleteForm.watch("confirmation_text") !== "delete"} className="bg-red-500 text-white hover:bg-red-600">Delete</Button>
-                                        <DialogClose asChild>
-                                            <Button type="button" variant="outline">Cancel</Button>
-                                        </DialogClose>
-                                    </DialogFooter>)
-                                    }
-                                </div>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogTrigger asChild>
-                    <Button type="button" variant="ghost" size="sm" className="flex items-center ml-3">
-                        <Edit2 className="mr-2 h-4 w-4" />
-                    </Button>
-                </DialogTrigger>
-                <DialogContent key="share-dialog">
-                    <DialogHeader>
-                        <DialogTitle>Edit {file.name}</DialogTitle>
-                    </DialogHeader>
-
-                    <Form {...editForm} >
-                        <form
-                        onSubmit={editForm.handleSubmit(onEditFileSubmit)}
-                        className="space-y-4"
-                        >
-                            <FormField
-                                control={editForm.control}
-                                name="name"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} value={field.value ?? ''} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            {isProcessing ?
-                            (<Loader2 className="flex justify-end w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />) : (
-                                <DialogFooter>
-                                    <Button type="submit">Save</Button>
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="outline">Cancel</Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            )}
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-        </div>
-        );
-    }
-
+  if (view === 'list') {
     return (
-        <>
-        <Card className="group hover:shadow-card transition-all duration-200 cursor-pointer">
-        <CardContent className="p-4">
-            <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-muted">
-                <FileIcon className={cn("h-6 w-6", iconColor)} />
-            </div>
-            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {/* <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleStarringClick(e, file.uuid)}
+      <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group border border-border/50 bg-card/60">
+        <div className="flex items-center space-x-3 min-w-0 flex-1">
+          <FileIcon className={cn("h-6 w-6 flex-shrink-0", iconColor)} />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-foreground truncate" title={file.name}>
+              {file.name}
+            </p>
+            <p className="text-xs text-muted-foreground">{file.formatted_date || file.created_at}</p>
+          </div>
+        </div>
 
-                className={cn(isStarred && "text-yellow-500")}
-                >
-                <Star className={cn("h-4 w-4", isStarred && "fill-current")} />
-                </Button> */}
+        <div className="flex items-center space-x-4 ml-4">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {typeof file.size_in_mb === 'number' ? `${file.size_in_mb} MB` : (file.size_in_mb || file.size_in_kb || '')}
+          </span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
+            {file.total_downloads || 0} downloads
+          </span>
 
-            <FileAction file={file} action="star" />
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <MoreVertical className="h-4 w-4" />
-                </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                <FileAction file={file} action="download" />
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsShareOpen(true); }}>
-                    <Share2 className="ml-2 mr-2 h-4 w-4" /> Share
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEditOpen(true); }}>
-                    <Edit2 className="ml-2 mr-2 h-4 w-4" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive" onSelect={(e) => { e.preventDefault(); setOpenDeleteModal(true); }}>
-                    <Trash2 className="ml-2 mr-2 h-4 w-4" /> Delete
-                </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            </div>
-            </div>
-            <div className="space-y-1">
-            <h3 className="font-medium text-sm text-foreground truncate">{shortFileName(file.name)}</h3>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{file.size_in_mb}</span>
-                <span className="flex items-center space-x-2 text-xs text-muted-foreground">{file.total_downloads} download(s)</span>
-                <span>{file.formatted_date}</span>
-            </div>
-            </div>
-            </CardContent>
-            </Card>
-            <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
-                    <DialogContent key="share-dialog">
-                        <DialogHeader>
-                            <DialogTitle>Share this {file.name} with?</DialogTitle>
-                        </DialogHeader>
+          <div className="flex items-center space-x-1">
+            {!isTrash ? (
+              <>
+                <FileAction file={file} action="star" view="list" />
+                <FileAction file={file} action="download" view="list" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => setIsShareOpen(true)}>
+                      <Share2 className="mr-2 h-4 w-4" /> Share
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => setIsEditOpen(true)}>
+                      <Edit2 className="mr-2 h-4 w-4" /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => setOpenDeleteModal(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Move to Trash
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <FileAction file={file} action="restore" view="list" />
+                <FileAction file={file} action="force_delete" view="list" />
+              </>
+            )}
+          </div>
+        </div>
 
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onShareFileSubmit)}>
-                                    <FormField
-                                        control={form.control}
-                                        name="file_uuid"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                            <Input
-                                                type="hidden"
-                                                {...field}
-                                                value={file.uuid}
-                                            />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
+        {/* Share Dialog */}
+        <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share "{file.name}"</DialogTitle>
+            </DialogHeader>
+            <Form {...shareForm}>
+              <form onSubmit={shareForm.handleSubmit(onShareFileSubmit)} className="space-y-4">
+                <FormField
+                  control={shareForm.control}
+                  name="receiver_email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>User Email</FormLabel>
+                      <FormControl>
+                        <AutoCompleteSearchInput
+                          value={field.value}
+                          onSelect={(email) => shareForm.setValue('receiver_email', email)}
+                          disabled={isProcessing}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isProcessing} className="bg-gradient-primary text-white">
+                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Share
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
 
-                                    <FormField
-                                        control={form.control}
-                                        name="receiver_email"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <AutoCompleteSearchInput disabled={isProcessing} onSelect={(value) => handleSelectedUser(value)} value={field.value ?? ''}/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                    <div className="h-4 mt-4 flex justify-end mb-2">
-                                        {isProcessing ?
-                                        (<Loader2 className="w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />) :
-                                        (<DialogFooter className="space-x-2 mb-4">
-                                            <Button type="submit">Share</Button>
-                                            <DialogClose asChild>
-                                                <Button type="button" variant="outline">Cancel</Button>
-                                            </DialogClose>
-                                        </DialogFooter>)
-                                        }
-                                    </div>
-                            </form>
-                        </Form>
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Rename "{file.name}"</DialogTitle>
+            </DialogHeader>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(onEditFileSubmit)} className="space-y-4">
+                <FormField
+                  control={editForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>File name</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isProcessing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={isProcessing} className="bg-gradient-primary text-white">
+                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
 
-                    </DialogContent>
-            </Dialog>
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                    <DialogContent key="share-dialog">
-                        <DialogHeader>
-                            <DialogTitle>Edit {file.name}</DialogTitle>
-                        </DialogHeader>
-
-                        <Form {...editForm} >
-                            <form
-                            onSubmit={editForm.handleSubmit(onEditFileSubmit)}
-                            className="space-y-4"
-                            >
-                                <FormField
-                                    control={editForm.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Name</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} value={field.value ?? ''} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                    )}
-                                />
-                                <div className="flex justify-end">
-                                {isProcessing ?
-                                    (<Loader2 className="w-4 h-4 animate-spin text-[hsl(185,77%,54%)]/80" />)
-                                    : (
-                                        <DialogFooter>
-                                            <Button type="submit">Save</Button>
-                                            <DialogClose asChild>
-                                                <Button type="button" variant="outline">Cancel</Button>
-                                            </DialogClose>
-                                        </DialogFooter>
-                                    )}
-                                </div>
-
-                            </form>
-                        </Form>
-                    </DialogContent>
-                </Dialog>
-            <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal} >
-                    <DialogContent key="share-dialog" className="">
-                        <DialogHeader>
-                            <DialogTitle>Are you sure you want to delete this file, {file.name}?</DialogTitle>
-                        </DialogHeader>
-
-                    <Form {...deleteForm}>
-                            <form onSubmit={deleteForm.handleSubmit(onDeleteFile)}>
-                                    <FormField
-                                        control={form.control}
-                                        name="file_uuid"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-xs mb-2">Enter 'delete' to confirm deletion</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="hidden"
-                                                    {...field}
-                                                    value={file.uuid}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={deleteForm.control}
-                                        name="confirmation_text"
-                                        render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                                <Input  className="w-full border rounded" type="text" {...field} value={field.value ?? ''} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                        )}
-                                    />
-                                    <div className="h-4 mt-4 flex justify-end">
-                                        {isProcessing ?
-                                        (<div className="flex justify-end">
-                                            <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
-                                        </div>) :
-                                        (<DialogFooter>
-                                            <Button type="submit" disabled={deleteForm.watch("confirmation_text") !== "delete"} className="bg-red-500 text-white hover:bg-red-600">Delete</Button>
-                                            <DialogClose asChild>
-                                                <Button type="button" variant="outline">Cancel</Button>
-                                            </DialogClose>
-                                        </DialogFooter>)
-                                        }
-                                    </div>
-                            </form>
-                        </Form>
-                    </DialogContent>
-            </Dialog>
-        </>
+        {/* Delete Dialog */}
+        <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete "{file.name}"</DialogTitle>
+            </DialogHeader>
+            <Form {...deleteForm}>
+              <form onSubmit={deleteForm.handleSubmit(onDeleteFile)} className="space-y-4">
+                <FormField
+                  control={deleteForm.control}
+                  name="confirmation_text"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type <code>delete</code> to confirm moving this file to Trash</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="delete" disabled={isProcessing} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" variant="destructive" disabled={isProcessing}>
+                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Move to Trash
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
     );
+  }
+
+  // Grid view
+  return (
+    <>
+      <Card className="group hover:shadow-card transition-all duration-200 border-border bg-card overflow-hidden">
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="w-12 h-12 rounded-xl bg-muted/60 flex items-center justify-center">
+              <FileIcon className={cn("h-6 w-6", iconColor)} />
+            </div>
+
+            <div className="flex items-center space-x-1">
+              {!isTrash ? (
+                <>
+                  <FileAction file={file} action="star" view="grid" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-80 group-hover:opacity-100">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => window.location.href = route('file.download', { file_uuid: file.uuid })}>
+                        <Download className="mr-2 h-4 w-4" /> Download
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setIsShareOpen(true)}>
+                        <Share2 className="mr-2 h-4 w-4" /> Share
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setIsEditOpen(true)}>
+                        <Edit2 className="mr-2 h-4 w-4" /> Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => setOpenDeleteModal(true)}>
+                        <Trash2 className="mr-2 h-4 w-4" /> Move to Trash
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <div className="flex items-center space-x-1">
+                  <FileAction file={file} action="restore" view="grid" />
+                  <FileAction file={file} action="force_delete" view="grid" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <h3 className="font-medium text-sm text-foreground truncate" title={file.name}>
+              {file.name}
+            </h3>
+            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+              <span>{typeof file.size_in_mb === 'number' ? `${file.size_in_mb} MB` : (file.size_in_mb || file.size_in_kb || '')}</span>
+              <span>{file.formatted_date || file.created_at}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Share Dialog */}
+      <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share "{file.name}"</DialogTitle>
+          </DialogHeader>
+          <Form {...shareForm}>
+            <form onSubmit={shareForm.handleSubmit(onShareFileSubmit)} className="space-y-4">
+              <FormField
+                control={shareForm.control}
+                name="receiver_email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Recipient Email</FormLabel>
+                    <FormControl>
+                      <AutoCompleteSearchInput
+                        value={field.value}
+                        onSelect={(email) => shareForm.setValue('receiver_email', email)}
+                        disabled={isProcessing}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                </DialogClose>
+                <Button type="submit" disabled={isProcessing} className="bg-gradient-primary text-white">
+                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Share
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename "{file.name}"</DialogTitle>
+          </DialogHeader>
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditFileSubmit)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>File name</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled={isProcessing} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                </DialogClose>
+                <Button type="submit" disabled={isProcessing} className="bg-gradient-primary text-white">
+                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={openDeleteModal} onOpenChange={setOpenDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete "{file.name}"</DialogTitle>
+          </DialogHeader>
+          <Form {...deleteForm}>
+            <form onSubmit={deleteForm.handleSubmit(onDeleteFile)} className="space-y-4">
+              <FormField
+                control={deleteForm.control}
+                name="confirmation_text"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type <code>delete</code> to confirm moving this file to Trash</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="delete" disabled={isProcessing} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" disabled={isProcessing}>Cancel</Button>
+                </DialogClose>
+                <Button type="submit" variant="destructive" disabled={isProcessing}>
+                  {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Move to Trash
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
+
+export default FileCard;

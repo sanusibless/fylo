@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('uploaded_files', function (Blueprint $table) {
             $table->id();
-            $table->uuid("uuid")->unique();
+            $table->uuid('uuid')->unique();
             $table->foreignIdFor(User::class);
             $table->longText('name');
             $table->string('type');

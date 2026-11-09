@@ -1,6 +1,7 @@
 <?php
 
-function getFileType($extention) {
+function getFileType($extention)
+{
     $extention = strtolower($extention);
     switch ($extention) {
         case 'jpg':
@@ -34,7 +35,7 @@ function getFileType($extention) {
             return 'audio';
         default:
             return 'unknown';
-        
+
     }
 
 }

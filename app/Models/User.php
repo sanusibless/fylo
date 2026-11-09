@@ -6,7 +6,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Log;
 
 class User extends Authenticatable
 {
@@ -48,22 +47,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     protected static function booted()
     {
         parent::boot();
         static::created(function ($user) {
-            UserStoragePlan::create(['user_id' => $user->id, 'storage_plan_id' => 1]);
+            $defaultPlanId = StoragePlan::first()?->id ?? 1;
+            UserStoragePlan::firstOrCreate([
+                'user_id' => $user->id,
+            ], [
+                'storage_plan_id' => $defaultPlanId,
+            ]);
         });
     }
 
     public function getInitialAttribute()
     {
-        $explodedName = explode(' ', $this->name);
+        $explodedName = explode(' ', trim($this->name));
 
-        if (count($explodedName) > 1) {
-            return $explodedName[0][0] . $explodedName[1][0];
+        if (count($explodedName) > 1 && ! empty($explodedName[1])) {
+            return mb_strtoupper(mb_substr($explodedName[0], 0, 1).mb_substr($explodedName[1], 0, 1));
         }
-        return mb_substr($this->name, 0, 1);
+
+        return mb_strtoupper(mb_substr($this->name, 0, 1));
     }
 
     public function files()
@@ -76,15 +82,46 @@ class User extends Authenticatable
         return $this->hasMany(SharedFile::class, 'receiver_id', 'id');
     }
 
-
     public function totalSharedFiles()
     {
         return $this->sharedFiles()->count();
     }
+
+    public function totalDownloads(): int
+    {
+        return (int) $this->files()->sum('downloads');
+    }
+
     public function totalStorageUsed()
     {
-        $totalSize = $this->files()->sum('size');
+        $totalSize = (float) $this->files()->sum('size');
+
         return round($totalSize / (1024 * 1024 * 1024), 2);
+    }
+
+    public function totalStorageUsedBytes(): float
+    {
+        return (float) $this->files()->sum('size');
+    }
+
+    public function storageCapacityGB(): float
+    {
+        $capacity = $this->storagePlan?->storagePlanDetail?->capacity;
+        if (! $capacity || strtolower((string) $capacity) === 'unlimited') {
+            return 999999.0;
+        }
+
+        return (float) $capacity;
+    }
+
+    public function storageCapacityBytes(): float
+    {
+        return $this->storageCapacityGB() * 1024 * 1024 * 1024;
+    }
+
+    public function hasAvailableStorageFor(int $bytes): bool
+    {
+        return ($this->totalStorageUsedBytes() + $bytes) <= $this->storageCapacityBytes();
     }
 
     public function storagePlan()

@@ -22,8 +22,17 @@ class ShareFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'file_uuid' =>  ['required', 'exists:uploaded_files,uuid'],
-            'receiver_email' => ['required', 'email', 'exists:users,email'],
+            'file_uuid' => ['required', 'exists:uploaded_files,uuid'],
+            'receiver_email' => [
+                'required',
+                'email',
+                'exists:users,email',
+                function ($attribute, $value, $fail) {
+                    if (auth()->check() && strtolower(auth()->user()->email) === strtolower($value)) {
+                        $fail('You cannot share a file with yourself.');
+                    }
+                },
+            ],
         ];
     }
 }

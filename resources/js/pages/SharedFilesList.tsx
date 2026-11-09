@@ -1,213 +1,163 @@
-import { useState } from "react";
-import { FileText, Image, FileVideo, FileAudio, File, MoreVertical, Download, Share2, Edit, Trash2, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner"
 import DashboardLayout from "@/layouts/dashboard-layout/DashboardLayout";
 import FileAction from "@/components/FileAction";
 import EmptyState from "@/components/EmptyState";
 import { Link } from "@inertiajs/react";
+import { getFileIcon, getFileColor } from "@/components/FileCard";
+import { type SharedFileItem, type StorageUsage, type PaginatedData } from "@/types";
+import { cn } from "@/lib/utils";
 
-interface SharedFile {
-
-    file : {
-        id: string;
-        name: string;
-        type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder';
-        uuid: string;
-        size: string;
-        size_in_mb: number;
-        formatted_date: string;
-        is_favorite?: boolean;
-        thumbnail?: string;
-    }
-    sharedBy: { name: string; email: string };
-    sharedDate: string;
+interface SharedFilesListProps {
+  sharedFiles: PaginatedData<SharedFileItem>;
+  storage?: StorageUsage;
 }
 
-const getFileIcon = (type: SharedFile["file"]["type"]) => {
-  const iconProps = { className: "w-5 h-5" };
-  switch (type) {
-    case "document":
-      return <FileText {...iconProps} className="w-5 h-5 text-primary" />;
-    case "image":
-      return <Image {...iconProps} className="w-5 h-5 text-green-600" />;
-    case "video":
-      return <FileVideo {...iconProps} className="w-5 h-5 text-red-600" />;
-    case "audio":
-      return <FileAudio {...iconProps} className="w-5 h-5 text-orange-600" />;
-    default:
-      return <File {...iconProps} className="w-5 h-5 text-muted-foreground" />;
-  }
-};
-
-interface SharedFileItemProps {
-  sharedFiles: SharedFile[];
-  storage: {
-    totalUsed: number | string;
-    totalAvailable: number | string;
-  };
-
-}
-
-const SharedFilesList = ({ sharedFiles, storage }: SharedFileItemProps ) => {
+export default function SharedFilesList({ sharedFiles, storage }: SharedFilesListProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filesShared] = useState<SharedFile[]>(sharedFiles.data);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  console.log(filesShared);
+  const filesShared = sharedFiles?.data || [];
 
-  const filteredFiles = filesShared.filter((fileShared) =>
-    fileShared.file?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
-  );
-
-  const handleAction = (action: string, fileName: string) => {
-    toast({
-      title: `${action} action`,
-      description: `${action} "${fileName}"`,
-    });
-  };
+  const filteredFiles = useMemo(() => {
+    if (!searchQuery.trim()) return filesShared;
+    const q = searchQuery.toLowerCase();
+    return filesShared.filter((item) =>
+      item.file?.name?.toLowerCase()?.includes(q) ||
+      item.sharedBy?.name?.toLowerCase()?.includes(q) ||
+      item.sharedBy?.email?.toLowerCase()?.includes(q)
+    );
+  }, [filesShared, searchQuery]);
 
   return (
-        <DashboardLayout title="Shared Files">
-          <DashboardSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} storage={storage} />
-          <div className="flex-1 flex flex-col lg:ml-0">
-            <DashboardHeader onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
-                <div className="min-h-screen">
-                    <div className="container mx-auto px-4 py-8">
-                        {/* Header */}
-                        <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-foreground mb-2">Shared Files</h1>
-                        <p className="text-muted-foreground">Manage your shared documents and media</p>
-                        </div>
+    <DashboardLayout title="Shared Files - Fylo">
+      <DashboardSidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        storage={storage}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <DashboardHeader
+          onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+          onSearch={setSearchQuery}
+        />
 
-                        {/* Search */}
-                        <div className="mb-6">
-                        <div className="relative max-w-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                            type="text"
-                            placeholder="Search files..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10"
-                            />
-                        </div>
-                        </div>
-
-                        {/* Files List */}
-                        <div className=" rounded-lg border border-border overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-border ">
-                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Name</th>
-                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden md:table-cell">
-                                    Shared By
-                                </th>
-                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden sm:table-cell">
-                                    Size
-                                </th>
-                                <th className="text-left py-4 px-6 text-sm font-semibold text-foreground hidden lg:table-cell">
-                                    Date Shared
-                                </th>
-                                <th className="w-12 py-4 px-6">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredFiles.length > 0 && filteredFiles.map((sharedFile) => {
-                                    const { file, sharedDate, sharedBy } = sharedFile;
-                                    return (
-                                        <tr
-                                            key={file.id}
-                                            className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors"
-                                        >
-                                    <td className="py-4 px-6">
-
-                                                <div className="flex items-center gap-3">
-                                                <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
-                                                <span className="font-medium text-foreground truncate">{file.name}</span>
-                                                </div>
-
-
-                                    </td>
-                                    <td className="py-4 px-6 hidden md:table-cell">
-                                    <div className="flex flex-col justify-center -space-x-2">
-                                        <span className="text-muted-foreground">{sharedBy.name}</span>
-                                        <span className="text-muted-foreground text-xs">({sharedBy.email})</span>
-                                    </div>
-                                    </td>
-                                    <td className="py-4 px-6 text-sm text-muted-foreground hidden sm:table-cell">
-                                    {file.size}
-                                    </td>
-                                    <td className="py-4 px-6 text-sm text-muted-foreground hidden lg:table-cell">
-                                    {new Date(sharedDate).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
-                                    })}
-                                    </td>
-                                    <td className="py-4 px-6 text-white">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>
-                                            <FileAction file={file} action="download" />
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem className="text-destructive">
-                                                <FileAction file={file} action="delete" />
-                                            </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </td>
-                                </tr>
-                                    )
-                                })}
-                            </tbody>
-                            </table>
-                        </div>
-                        <div className="flex justify-end m-3 space-x-2 ">
-                        {sharedFiles.links.map((link, i) => (
-                        <Link
-                            key={i}
-                            href={link.url || '#'}
-                            preserveScroll
-                            className={`px-3 py-1 text-sm border rounded ${
-                            link.active
-                                ? 'bg-blue-400 text-white'
-                                : 'hover:bg-gray-400 hover:text-white'
-                            } ${!link.url && 'opacity-50 cursor-not-allowed'}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                        ))}
-                    </div>
-                        </div>
-
-                    {/* // Empty State */}
-                        {filteredFiles.length === 0 && (
-                        <EmptyState message="No shared files found" />
-                        )}
-                    </div>
-                </div>
+        <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-1">Shared With Me</h1>
+              <p className="text-sm text-muted-foreground">Files and documents that colleagues have shared with you</p>
             </div>
-        </DashboardLayout>
-  );
-};
 
-export default SharedFilesList;
+            {/* Search */}
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search shared files..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-card border-border"
+              />
+            </div>
+          </div>
+
+          {/* Files List */}
+          <div className="rounded-lg border border-border overflow-hidden bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40 text-muted-foreground text-xs uppercase">
+                    <th className="py-4 px-6 font-semibold">Name</th>
+                    <th className="py-4 px-6 font-semibold hidden md:table-cell">Shared By</th>
+                    <th className="py-4 px-6 font-semibold hidden sm:table-cell">Size</th>
+                    <th className="py-4 px-6 font-semibold hidden lg:table-cell">Date Shared</th>
+                    <th className="w-24 py-4 px-6 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredFiles.length > 0 ? (
+                    filteredFiles.map((sharedFile, idx) => {
+                      const { file, sharedDate, sharedBy } = sharedFile;
+                      if (!file) return null;
+                      const FileIcon = getFileIcon(file.type);
+                      const iconColor = getFileColor(file.type);
+
+                      return (
+                        <tr
+                          key={file.uuid || file.id || idx}
+                          className="hover:bg-muted/50 transition-colors"
+                        >
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3 min-w-0 max-w-xs md:max-w-md">
+                              <FileIcon className={cn("h-5 w-5 flex-shrink-0", iconColor)} />
+                              <span className="font-medium text-foreground truncate" title={file.name}>
+                                {file.name}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 hidden md:table-cell">
+                            <div className="flex flex-col">
+                              <span className="text-foreground text-sm font-medium">{sharedBy?.name || 'Unknown'}</span>
+                              <span className="text-muted-foreground text-xs">{sharedBy?.email || ''}</span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-sm text-muted-foreground hidden sm:table-cell">
+                            {typeof file.size_in_mb === 'number' ? `${file.size_in_mb} MB` : (file.size_in_mb || file.size_in_kb || file.size)}
+                          </td>
+                          <td className="py-4 px-6 text-sm text-muted-foreground hidden lg:table-cell">
+                            {new Date(sharedDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <div className="flex items-center justify-center space-x-1">
+                              <FileAction file={file} action="download" view="list" />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredFiles.length === 0 && (
+              <div className="py-12">
+                <EmptyState message={searchQuery ? `No shared files match "${searchQuery}"` : "No files have been shared with you yet"} />
+              </div>
+            )}
+
+            {/* Pagination links */}
+            {sharedFiles?.links && sharedFiles.links.length > 3 && (
+              <div className="flex justify-end p-4 border-t border-border space-x-1">
+                {sharedFiles.links.map((link, i) => (
+                  <Link
+                    key={i}
+                    href={link.url || '#'}
+                    preserveScroll
+                    className={cn(
+                      "px-3 py-1.5 text-xs font-medium rounded border border-border transition-colors",
+                      link.active
+                        ? "bg-teal-500 text-white border-teal-500"
+                        : "text-muted-foreground hover:bg-muted",
+                      !link.url && "opacity-40 cursor-not-allowed pointer-events-none"
+                    )}
+                    dangerouslySetInnerHTML={{ __html: link.label }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

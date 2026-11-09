@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\StoragePlan;
-use App\Models\UserStoragePlan;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class StoragePlanSeeder extends Seeder
@@ -14,30 +12,30 @@ class StoragePlanSeeder extends Seeder
      */
     public function run(): void
     {
-       $plans = [
+        $plans = [
             [
-                "name" => "Free",
-                "capacity" => "10",
+                'name' => 'Free',
+                'capacity' => '10',
             ],
             [
-                "name" => "Basic",
-                "capacity" => "20",
+                'name' => 'Basic',
+                'capacity' => '20',
             ],
             [
-                "name" => "Premium",
-                "capacity" => "200",
+                'name' => 'Premium',
+                'capacity' => '200',
             ],
             [
-                "name" => "Enterprise",
-                "capacity" => "Unlimited",
-            ]
+                'name' => 'Enterprise',
+                'capacity' => 'Unlimited',
+            ],
         ];
 
-        StoragePlan::insert($plans);
-        UserStoragePlan::create([
-            "user_id" => 3,
-            "storage_plan_id" => 2,
-        ]);
-
+        foreach ($plans as $plan) {
+            StoragePlan::firstOrCreate(
+                ['name' => $plan['name']],
+                ['capacity' => $plan['capacity']]
+            );
+        }
     }
 }

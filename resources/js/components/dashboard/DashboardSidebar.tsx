@@ -1,7 +1,5 @@
-
 import {
   Files,
-  FolderOpen,
   Users,
   Trash2,
   Star,
@@ -13,30 +11,30 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Link } from "@inertiajs/react";
-import { route } from 'ziggy-js';
 import UploadFile from "./UploadFile";
+import { type StorageUsage } from "@/types";
 
 const navigation = [
   { name: "All Files", href: "/dashboard", icon: Files },
   { name: "Recent", href: "/recent", icon: Clock },
   { name: "Starred", href: "/starred", icon: Star },
-  { name: "Shared", href: route('shared_files'), icon: Users },
-  { name: "Folders", href: "/folders", icon: FolderOpen },
+  { name: "Shared", href: "/shared-files", icon: Users },
   { name: "Trash", href: "/trash", icon: Trash2 },
 ];
 
 interface DashboardSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  storage: {
-    totalUsed: number | string;
-    totalAvailable: number | string;
-  };
+  storage?: StorageUsage;
 }
 
 export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebarProps) {
-    const currentRoute = route().current();
-    const { totalUsed, totalAvailable } = storage;
+  const totalUsed = Number(storage?.totalUsed ?? 0);
+  const totalAvailable = Number(storage?.totalAvailable ?? 10);
+  const planName = storage?.planName ?? 'Free';
+  const progressPercent = totalAvailable > 0 ? Math.min(100, Math.round((totalUsed / totalAvailable) * 100)) : 0;
+
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/dashboard';
 
   return (
     <>
@@ -51,19 +49,19 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
       {/* Sidebar */}
       <div
         className={cn(
-            "h-screen w-64 bg-fylo-header border-r border-border transition-transform duration-300 ease-in-out",
-            "fixed top-0 left-0 z-50 transform lg:transform-none lg:relative lg:z-0",
-            isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "h-screen w-64 bg-fylo-header border-r border-border transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0",
+          "fixed top-0 left-0 z-50 transform lg:transform-none lg:relative lg:z-0",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
-        >
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div className="flex items-center space-x-2">
+          <Link href="/dashboard" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Files className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white">Fylo</span>
-          </div>
+          </Link>
           <Button
             variant="ghost"
             size="sm"
@@ -75,31 +73,21 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
         </div>
 
         {/* Upload Button */}
-
-        <UploadFile />
-
-        {/* <div className="p-4">
-          <Button className="w-full bg-gradient bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[] hover:bg-[hsl(200,77%,54%)]/90">
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Files
-          </Button>
-        </div> */}
+        <div className="p-3">
+          <UploadFile />
+        </div>
 
         {/* Navigation */}
-        <nav className="px-4 space-y-1">
+        <nav className="px-4 space-y-1 flex-1 overflow-y-auto">
           {navigation.map((item) => {
-
-            console.log(currentRoute);
-            const isActive = currentRoute === item.href;
+            const isActive = currentPath === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-[hsl(185,77%,54%)]/80",
-                  isActive
-                    ? "text-white p-4 rounded-lg hover:bg-[hsl(185,77%,54%)]/80"
-                    : ""
+                  "flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors text-gray-300 hover:text-white hover:bg-white/10",
+                  isActive && "bg-gradient-to-r from-teal-500/80 to-blue-600/80 text-white font-semibold shadow-sm"
                 )}
               >
                 <item.icon className="mr-3 h-4 w-4" />
@@ -110,19 +98,31 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
         </nav>
 
         {/* Storage Usage */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        <div className="p-4 border-t border-border mt-auto">
           <div className="space-y-3">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <HardDrive className="mr-2 h-4 w-4" />
-              Storage Usage
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span className="flex items-center">
+                <HardDrive className="mr-2 h-4 w-4 text-teal-400" />
+                Storage Usage
+              </span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/10 text-white">
+                {planName}
+              </span>
             </div>
-            <Progress value={Number(totalUsed)} className="h-2" />
+            <Progress value={progressPercent} className="h-2 bg-slate-700" />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{totalUsed} GB used</span>
-              <span>{totalAvailable} GB total</span>
+              <span>{totalUsed.toFixed(2)} GB used</span>
+              <span>{totalAvailable >= 9999 ? 'Unlimited' : `${totalAvailable} GB`}</span>
             </div>
-            <Button className="bg-[hsl(192,77%,54%)]/80 text-white hover:bg-[hsl(200,77%,54%)]/90">
-              Upgrade Plan
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full bg-white/5 border-white/20 text-white hover:bg-white/10"
+              onClick={() => {
+                alert(`You are currently on the ${planName} plan with ${totalAvailable >= 9999 ? 'Unlimited' : totalAvailable + ' GB'} storage.`);
+              }}
+            >
+              Plan Details
             </Button>
           </div>
         </div>
@@ -130,3 +130,5 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
     </>
   );
 }
+
+export default DashboardSidebar;

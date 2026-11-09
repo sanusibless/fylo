@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class File extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'uploaded_files';
+
     protected $guarded = ['id'];
 
     protected $appends = ['size_in_kb', 'size_in_mb', 'total_downloads'];
@@ -26,9 +30,10 @@ class File extends Model
      */
     public function getSizeInKBAttribute()
     {
-        return round($this->size / 1024, 2) . "KB";
+        return round($this->size / 1024, 2).'KB';
 
     }
+
     /**
      * Returns the size of the file in megabytes (MB) as a 2 decimal place value.
      *
@@ -36,13 +41,14 @@ class File extends Model
      */
     public function getSizeInMBAttribute()
     {
-        return round($this->size / (1024 * 1024), 2) . "MB";
+        return round($this->size / (1024 * 1024), 2).'MB';
     }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function getFormattedDateAttribute()
     {
         return $this->created_at->diffForHumans();
@@ -56,15 +62,17 @@ class File extends Model
 
     public function getTotalDownloadsAttribute()
     {
-        switch ($this->downloads) {
-            case $this->downloads >= 1000:
-                return $this->downloads/1000 . "K";
-            case $this->downloads >= 1000000:
-                return $this->downloads / 1000000 . "M";
-            case $this->downloads >= 1000000000:
-                return $this->downloads / 1000000000 . "B";
-            default:
-                return $this->downloads;
+        $downloads = (int) $this->downloads;
+        if ($downloads >= 1_000_000_000) {
+            return round($downloads / 1_000_000_000, 1).'B';
         }
+        if ($downloads >= 1_000_000) {
+            return round($downloads / 1_000_000, 1).'M';
+        }
+        if ($downloads >= 1_000) {
+            return round($downloads / 1_000, 1).'K';
+        }
+
+        return (string) $downloads;
     }
 }

@@ -14,6 +14,15 @@ class EditFileNameRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('file_uuid') && $this->route('file_uuid')) {
+            $this->merge([
+                'file_uuid' => $this->route('file_uuid'),
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -23,7 +32,7 @@ class EditFileNameRequest extends FormRequest
     {
         return [
             'file_uuid' => 'required|string|exists:uploaded_files,uuid',
-            'name' => 'required|string',
+            'name' => 'required|string|min:1|max:255',
         ];
     }
 }

@@ -11,8 +11,9 @@ interface User {
 }
 
 interface AutoCompleteSearchInputProps {
-    value : string,
-    onSelect : (value : string) => void,
+    value: string;
+    onSelect: (value: string) => void;
+    disabled?: boolean;
 }
 
 export default function AutoCompleteSearchInput({ onSelect, value, disabled = false } : AutoCompleteSearchInputProps) {

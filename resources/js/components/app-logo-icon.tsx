@@ -1,7 +1,11 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
-export default function AppLogoIcon() {
+interface AppLogoIconProps {
+    className?: string;
+}
+
+export default function AppLogoIcon({ className }: AppLogoIconProps) {
     return (
-        <img src="images/logo.svg" alt="Fylo Logo" className="w-32" />
+        <img src="/images/logo.svg" alt="Fylo Logo" className={cn("w-32", className)} />
     );
 }

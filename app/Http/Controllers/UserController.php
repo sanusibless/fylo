@@ -8,10 +8,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct(protected GeneralService $generalService)
-    {
-        
-    }
+    public function __construct(protected GeneralService $generalService) {}
 
     public function search(Request $request)
     {
@@ -24,10 +21,11 @@ class UserController extends Controller
                 ->limit(10)
                 ->get(['id', 'name', 'email']);
 
-            return response()->json($this->generalService->serviceResponse(true, 'success', $users), 200); //$this->generalService->handle
+            return response()->json($this->generalService->serviceResponse(true, 'success', $users), 200); // $this->generalService->handle
         } catch (\Throwable $th) {
             throw $th;
         }
-        return response()->json($this->generalService->serviceResponse(true, 'success', $users), 400); //$this->generalService->handle
+
+        return response()->json($this->generalService->serviceResponse(true, 'success', $users), 400); // $this->generalService->handle
     }
 }
