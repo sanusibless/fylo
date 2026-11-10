@@ -143,8 +143,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/{file_uuid}/move', [FileController::class, 'moveFile'])->name('move');
     });
 
-    Route::get('logs', [LogViewerController::class, 'index'])->name('logs');
 });
+
+Route::get('logs', [LogViewerController::class, 'index'])->name('logs');
 
 /*
 |--------------------------------------------------------------------------
