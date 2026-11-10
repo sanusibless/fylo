@@ -6,9 +6,14 @@ use App\Http\Requests\EditFileNameRequest;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\ShareFileRequest;
 use App\Models\File;
+use App\Models\Folder;
 use App\Models\SharedFile;
 use App\Services\FileService;
 use App\Services\GeneralService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
@@ -248,5 +253,121 @@ class FileController extends Controller
         }
 
         return redirect()->back()->withErrors(['file' => 'Unable to empty trash'])->withInput();
+    }
+
+    public function previewFile($file_uuid)
+    {
+        try {
+            $file = File::withTrashed()->where('uuid', $file_uuid)->firstOrFail();
+            $authId = auth()->id();
+            $isOwner = $file->user_id === $authId;
+            $isShared = SharedFile::where('file_id', $file->id)->where('receiver_id', $authId)->exists();
+
+            if (! $isOwner && ! $isShared) {
+                abort(403, 'Unauthorized access to preview.');
+            }
+
+            $relativeStoragePath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
+
+            if (! Storage::disk('public')->exists($relativeStoragePath)) {
+                abort(404, 'File not found on storage.');
+            }
+
+            $filePath = Storage::disk('public')->path($relativeStoragePath);
+
+            return response()->file($filePath, [
+                'Content-Type' => $file->mime_type ?: 'application/octet-stream',
+                'Content-Disposition' => 'inline; filename="'.$file->name.'"',
+            ]);
+        } catch (\Throwable $th) {
+            GeneralService::generalLog('Error in FileController::previewFile', $th);
+            abort(404, 'Unable to preview file.');
+        }
+    }
+
+    public function createPublicShare(Request $request, $file_uuid)
+    {
+        $request->validate([
+            'password' => 'nullable|string|min:4|max:100',
+            'expires_in_days' => 'nullable|integer|min:1|max:365',
+        ]);
+
+        $file = File::where('uuid', $file_uuid)->where('user_id', auth()->id())->firstOrFail();
+
+        $token = $file->share_token ?: Str::random(32);
+        $file->share_token = $token;
+        $file->is_public = true;
+
+        if ($request->filled('password')) {
+            $file->share_password = Hash::make($request->password);
+        }
+
+        if ($request->filled('expires_in_days')) {
+            $file->share_expires_at = now()->addDays((int) $request->expires_in_days);
+        }
+
+        $file->save();
+
+        $shareUrl = url("/s/{$token}");
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Public share link created successfully.',
+                'share_url' => $shareUrl,
+                'token' => $token,
+                'has_password' => ! empty($file->share_password),
+                'expires_at' => $file->share_expires_at?->toIso8601String(),
+            ]);
+        }
+
+        return back()->with('status', 'Share link activated!')->with('share_url', $shareUrl);
+    }
+
+    public function revokePublicShare(Request $request, $file_uuid)
+    {
+        $file = File::where('uuid', $file_uuid)->where('user_id', auth()->id())->firstOrFail();
+
+        $file->is_public = false;
+        $file->share_token = null;
+        $file->share_password = null;
+        $file->share_expires_at = null;
+        $file->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Public share link revoked successfully.',
+            ]);
+        }
+
+        return back()->with('status', 'Public share link revoked.');
+    }
+
+    public function moveFile(Request $request, $file_uuid)
+    {
+        $request->validate([
+            'folder_id' => 'nullable|integer',
+        ]);
+
+        $file = File::where('uuid', $file_uuid)->where('user_id', auth()->id())->firstOrFail();
+
+        if ($request->filled('folder_id')) {
+            $folder = Folder::where('id', $request->folder_id)->where('user_id', auth()->id())->firstOrFail();
+            $file->folder_id = $folder->id;
+        } else {
+            $file->folder_id = null;
+        }
+
+        $file->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'File moved successfully.',
+            ]);
+        }
+
+        return back()->with('status', 'File moved successfully.');
     }
 }

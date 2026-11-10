@@ -38,12 +38,29 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+        $storage = null;
+        if ($user) {
+            $userPlan = $user->userStoragePlan?->storagePlanDetail;
+            $storage = [
+                'totalUsed' => round($user->totalStorageUsedBytes() / (1024 * 1024 * 1024), 2),
+                'totalAvailable' => $user->storageCapacityGB(),
+                'planName' => $userPlan?->name ?? 'Free',
+            ];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+            ],
+            'storage' => $storage,
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'status' => $request->session()->get('status'),
+                'error' => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

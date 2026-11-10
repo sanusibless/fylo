@@ -13,6 +13,11 @@ class File extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'share_expires_at' => 'datetime',
+        'is_public' => 'boolean',
+    ];
+
     protected $appends = ['size_in_kb', 'size_in_mb', 'total_downloads'];
 
     public static function boot()
@@ -21,6 +26,16 @@ class File extends Model
         self::creating(function ($model) {
             $model->uuid = (string) \Illuminate\Support\Str::orderedUuid();
         });
+    }
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class, 'folder_id');
+    }
+
+    public function isShareExpired(): bool
+    {
+        return $this->share_expires_at !== null && $this->share_expires_at->isPast();
     }
 
     /**

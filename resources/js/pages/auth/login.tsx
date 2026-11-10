@@ -1,15 +1,15 @@
-import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
+import { useState } from 'react';
+import { register } from '@/routes';
+import { request } from '@/routes/password';
+import { Link, useForm, Head } from '@inertiajs/react';
+import { LoaderCircle, Eye, EyeOff } from 'lucide-react';
+
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
-import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
 
 interface LoginProps {
     status?: string;
@@ -17,72 +17,129 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/login', {
+            onFinish: () => reset('password'),
+        });
+    };
+
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+        <AuthLayout title="Welcome back" description="Enter your email and password to access your drive">
             <Head title="Log in" />
 
-            <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
-                {({ processing, errors }) => (
-                    <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="email@example.com"
-                                />
-                                <InputError message={errors.email} />
-                            </div>
+            {status && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs text-center font-medium">
+                    {status}
+                </div>
+            )}
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
-                                    {canResetPassword && (
-                                        <TextLink href={request()} className="ml-auto text-sm" tabIndex={5}>
-                                            Forgot password?
-                                        </TextLink>
-                                    )}
-                                </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="current-password"
-                                    placeholder="Password"
-                                />
-                                <InputError message={errors.password} />
-                            </div>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {/* Email Address */}
+                <div className="grid gap-1.5">
+                    <Label htmlFor="email" className="text-xs font-semibold text-gray-200">
+                        Email Address
+                    </Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        required
+                        autoFocus
+                        tabIndex={1}
+                        placeholder="alex@example.com"
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500"
+                    />
+                    <InputError message={errors.email} />
+                </div>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox id="remember" name="remember" tabIndex={3} />
-                                <Label htmlFor="remember">Remember me</Label>
-                            </div>
+                {/* Password with Visibility Toggle */}
+                <div className="grid gap-1.5">
+                    <div className="flex justify-between items-center">
+                        <Label htmlFor="password" className="text-xs font-semibold text-gray-200">
+                            Password
+                        </Label>
+                        {canResetPassword && (
+                            <Link
+                                href={request()}
+                                tabIndex={5}
+                                className="text-xs text-teal-400 hover:underline"
+                            >
+                                Forgot password?
+                            </Link>
+                        )}
+                    </div>
+                    <div className="relative">
+                        <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            tabIndex={2}
+                            placeholder="Enter your password"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500 pr-10"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                            aria-label="Toggle password visibility"
+                        >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
+                    <InputError message={errors.password} />
+                </div>
 
-                            <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Log in
-                            </Button>
-                        </div>
+                {/* Remember Me */}
+                <div className="flex items-center space-x-2 pt-1">
+                    <Checkbox
+                        id="remember"
+                        tabIndex={3}
+                        checked={data.remember}
+                        onCheckedChange={(checked) => setData('remember', checked === true)}
+                        className="border-slate-600 data-[state=checked]:bg-teal-400 data-[state=checked]:text-slate-900"
+                    />
+                    <label htmlFor="remember" className="text-xs text-gray-300">
+                        Remember this device for 30 days
+                    </label>
+                </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Sign up
-                            </TextLink>
-                        </div>
-                    </>
-                )}
-            </Form>
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    tabIndex={4}
+                    disabled={processing}
+                    className="w-full bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-300 hover:to-blue-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-md transition-all mt-2"
+                >
+                    {processing ? (
+                        <span className="flex items-center space-x-2">
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                            <span>Signing in...</span>
+                        </span>
+                    ) : (
+                        <span>Sign In</span>
+                    )}
+                </Button>
 
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
+                {/* Sign Up Link */}
+                <div className="text-center text-xs text-gray-400 mt-2">
+                    Don't have a Fylo account?{' '}
+                    <Link href={register()} className="text-teal-400 hover:underline font-semibold" tabIndex={6}>
+                        Get started free
+                    </Link>
+                </div>
+            </form>
         </AuthLayout>
     );
 }

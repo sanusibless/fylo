@@ -20,6 +20,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'is_admin',
         'password',
     ];
 
@@ -45,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -52,11 +55,14 @@ class User extends Authenticatable
     {
         parent::boot();
         static::created(function ($user) {
-            $defaultPlanId = StoragePlan::first()?->id ?? 1;
+            $defaultPlan = StoragePlan::firstOrCreate(['name' => 'Free'], [
+                'slug' => 'free',
+                'capacity' => '10',
+            ]);
             UserStoragePlan::firstOrCreate([
                 'user_id' => $user->id,
             ], [
-                'storage_plan_id' => $defaultPlanId,
+                'storage_plan_id' => $defaultPlan->id,
             ]);
         });
     }
@@ -125,6 +131,11 @@ class User extends Authenticatable
     }
 
     public function storagePlan()
+    {
+        return $this->hasOne(UserStoragePlan::class)->with('storagePlanDetail');
+    }
+
+    public function userStoragePlan()
     {
         return $this->hasOne(UserStoragePlan::class)->with('storagePlanDetail');
     }

@@ -3,7 +3,6 @@ import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
-
 interface AuthLayoutProps {
     name?: string;
     title?: string;
@@ -12,23 +11,30 @@ interface AuthLayoutProps {
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
     return (
-        <div className="bg-[#1c2431]/95 flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-            <div className="w-full max-w-sm">
-                <div className="flex flex-col gap-8">
-                    <div className="flex flex-col items-center gap-4">
-                        <Link href={home()} className="flex flex-col items-center gap-2 font-medium">
-                            <div className="mb-1 flex items-center justify-center rounded-md">
-                                <AppLogoIcon className="fill-current text-[var(--foreground)] dark:text-white" />
-                            </div>
-                            <span className="sr-only">{title}</span>
-                        </Link>
+        <div className="bg-[#0b1523] flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 text-white selection:bg-teal-400 selection:text-slate-900">
+            {/* Background Glow */}
+            <div className="fixed top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-teal-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-                        <div className="space-y-2 text-center">
-                            <h1 className="text-xl font-medium">{title}</h1>
-                            <p className="text-center text-sm text-muted-foreground">{description}</p>
-                        </div>
+            <div className="w-full max-w-md relative z-10">
+                <div className="flex flex-col items-center mb-8">
+                    <Link href={home()} className="flex items-center space-x-2 group mb-6">
+                        <img src="/images/logo.svg" alt="Fylo" className="h-9 w-auto transition-transform group-hover:scale-105" />
+                    </Link>
+
+                    <div className="space-y-1.5 text-center">
+                        <h1 className="text-2xl font-bold tracking-tight text-white">{title}</h1>
+                        <p className="text-sm text-gray-400">{description}</p>
                     </div>
+                </div>
+
+                <div className="bg-[#1c2431] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
                     {children}
+                </div>
+
+                <div className="mt-8 text-center text-xs text-gray-500">
+                    &copy; {new Date().getFullYear()} Fylo Inc. All rights reserved. •{' '}
+                    <Link href="/privacy" className="hover:text-gray-400 underline">Privacy</Link> •{' '}
+                    <Link href="/terms" className="hover:text-gray-400 underline">Terms</Link>
                 </div>
             </div>
         </div>
