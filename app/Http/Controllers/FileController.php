@@ -23,7 +23,8 @@ class FileController extends Controller
     {
         try {
             $file = $request->file('file');
-            $fileResponse = $this->fileService->storeFile(auth()->id(), $file);
+            $folderId = $request->filled('folder_id') ? (int) $request->input('folder_id') : null;
+            $fileResponse = $this->fileService->storeFile(auth()->id(), $file, 'uploads', $folderId);
 
             if ($fileResponse['status']) {
                 if ($request->expectsJson()) {
@@ -48,7 +49,7 @@ class FileController extends Controller
     public function starringFile($file_uuid)
     {
         try {
-            $fileResponse = $this->fileService->setAsFavouriteFile($file_uuid);
+            $fileResponse = $this->fileService->setAsFavouriteFile($file_uuid, auth()->id());
             if ($fileResponse['status']) {
                 if (request()->expectsJson()) {
                     return response()->json([
@@ -63,7 +64,7 @@ class FileController extends Controller
             if (request()->expectsJson()) {
                 return response()->json([
                     'error' => $fileResponse['message'] ?? 'Unable to toggle favorite status',
-                ], 400);
+                ], 403);
             }
 
             return redirect()->back()->withErrors(['error' => $fileResponse['message'] ?? 'Unable to toggle favorite status']);
@@ -94,16 +95,17 @@ class FileController extends Controller
                 return redirect()->back()->withErrors(['file' => 'You do not have permission to download this file.'])->withInput();
             }
 
-            $relativeStoragePath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
+            $diskPath = $file->resolveDiskPath();
+            $disk = $file->resolveStorageDisk();
 
-            if (! \Illuminate\Support\Facades\Storage::disk('public')->exists($relativeStoragePath)) {
+            if (! Storage::disk($disk)->exists($diskPath)) {
                 return redirect()->back()->withErrors(['file' => 'The requested file could not be found on storage.'])->withInput();
             }
 
             $file->increaseDownloads();
             activity()->causedBy($authId)->log("You downloaded {$file->name}");
 
-            return \Illuminate\Support\Facades\Storage::disk('public')->download($relativeStoragePath, $file->name);
+            return Storage::disk($disk)->download($diskPath, $file->name);
         } catch (\Throwable $th) {
             GeneralService::generalLog('Error in FileController::downloadFile', $th);
         }
@@ -267,18 +269,47 @@ class FileController extends Controller
                 abort(403, 'Unauthorized access to preview.');
             }
 
-            $relativeStoragePath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
+            $diskPath = $file->resolveDiskPath();
+            $disk = $file->resolveStorageDisk();
 
-            if (! Storage::disk('public')->exists($relativeStoragePath)) {
+            if (! Storage::disk($disk)->exists($diskPath)) {
                 abort(404, 'File not found on storage.');
             }
 
-            $filePath = Storage::disk('public')->path($relativeStoragePath);
+            $filePath = Storage::disk($disk)->path($diskPath);
+            $ext = strtolower($file->extension ?: pathinfo($file->name, PATHINFO_EXTENSION));
+
+            // Safe inline MIME types only; everything else forced as attachment or plain text
+            $safeInlineMimes = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'pdf' => 'application/pdf',
+                'mp4' => 'video/mp4',
+                'webm' => 'video/webm',
+                'mov' => 'video/quicktime',
+                'mp3' => 'audio/mpeg',
+                'wav' => 'audio/wav',
+                'ogg' => 'audio/ogg',
+                'm4a' => 'audio/mp4',
+                'txt' => 'text/plain; charset=utf-8',
+                'csv' => 'text/plain; charset=utf-8',
+                'md' => 'text/plain; charset=utf-8',
+                'json' => 'application/json; charset=utf-8',
+            ];
+
+            $contentType = $safeInlineMimes[$ext] ?? 'application/octet-stream';
+            $disposition = isset($safeInlineMimes[$ext]) ? 'inline' : 'attachment';
 
             return response()->file($filePath, [
-                'Content-Type' => $file->mime_type ?: 'application/octet-stream',
-                'Content-Disposition' => 'inline; filename="'.$file->name.'"',
+                'Content-Type' => $contentType,
+                'Content-Disposition' => $disposition.'; filename="'.addslashes($file->name).'"',
+                'X-Content-Type-Options' => 'nosniff',
             ]);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
         } catch (\Throwable $th) {
             GeneralService::generalLog('Error in FileController::previewFile', $th);
             abort(404, 'Unable to preview file.');
@@ -300,15 +331,21 @@ class FileController extends Controller
 
         if ($request->filled('password')) {
             $file->share_password = Hash::make($request->password);
+        } elseif ($request->has('clear_password') && $request->boolean('clear_password')) {
+            $file->share_password = null;
         }
 
         if ($request->filled('expires_in_days')) {
             $file->share_expires_at = now()->addDays((int) $request->expires_in_days);
+        } else {
+            $file->share_expires_at = null;
         }
 
         $file->save();
 
-        $shareUrl = url("/s/{$token}");
+        activity()->causedBy(auth()->id())->log("You created a public share link for {$file->name}");
+
+        $shareUrl = rtrim(config('app.url'), '/')."/s/{$token}";
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -334,6 +371,8 @@ class FileController extends Controller
         $file->share_expires_at = null;
         $file->save();
 
+        activity()->causedBy(auth()->id())->log("You revoked the public share link for {$file->name}");
+
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => true,
@@ -355,11 +394,15 @@ class FileController extends Controller
         if ($request->filled('folder_id')) {
             $folder = Folder::where('id', $request->folder_id)->where('user_id', auth()->id())->firstOrFail();
             $file->folder_id = $folder->id;
+            $destinationName = $folder->name;
         } else {
             $file->folder_id = null;
+            $destinationName = 'Root Drive';
         }
 
         $file->save();
+
+        activity()->causedBy(auth()->id())->log("You moved {$file->name} to {$destinationName}");
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -369,5 +412,66 @@ class FileController extends Controller
         }
 
         return back()->with('status', 'File moved successfully.');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|in:delete,restore,force_delete,move',
+            'file_uuids' => 'required|array|min:1',
+            'file_uuids.*' => 'required|string',
+            'folder_id' => 'nullable|integer',
+        ]);
+
+        $userId = auth()->id();
+        $uuids = $validated['file_uuids'];
+        $action = $validated['action'];
+        $count = 0;
+
+        if ($action === 'delete') {
+            foreach ($uuids as $uuid) {
+                $res = $this->fileService->deleteFile($userId, $uuid);
+                if ($res['status']) {
+                    $count++;
+                }
+            }
+            $message = "{$count} file(s) moved to Trash.";
+        } elseif ($action === 'restore') {
+            foreach ($uuids as $uuid) {
+                $res = $this->fileService->restoreFile($userId, $uuid);
+                if ($res['status']) {
+                    $count++;
+                }
+            }
+            $message = "{$count} file(s) restored from Trash.";
+        } elseif ($action === 'force_delete') {
+            foreach ($uuids as $uuid) {
+                $res = $this->fileService->forceDeleteFile($userId, $uuid);
+                if ($res['status']) {
+                    $count++;
+                }
+            }
+            $message = "{$count} file(s) permanently deleted.";
+        } else {
+            // move
+            $targetFolderId = null;
+            if (! empty($validated['folder_id'])) {
+                $folder = Folder::where('id', $validated['folder_id'])->where('user_id', $userId)->firstOrFail();
+                $targetFolderId = $folder->id;
+            }
+            $count = File::where('user_id', $userId)->whereIn('uuid', $uuids)->update(['folder_id' => $targetFolderId]);
+            activity()->causedBy($userId)->log("You moved {$count} file(s)");
+            $message = "{$count} file(s) moved successfully.";
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => true,
+                'message' => $message,
+                'count' => $count,
+            ]);
+        }
+
+        return back()->with('status', $message);
     }
 }

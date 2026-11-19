@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import { Menu, X, ArrowRight, ShieldCheck, Mail, Phone, MapPin } from "lucide-react";
 import useAuth from "@/hooks/use-auth";
+import { type SharedData } from "@/types";
 
 interface HomeLayoutProps {
   title: string;
@@ -11,6 +12,13 @@ interface HomeLayoutProps {
 export default function HomeLayout({ title, children }: HomeLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const user = useAuth();
+  const { appConfig } = usePage<SharedData>().props;
+
+  const appName = appConfig?.name || "Fylo";
+  const locationText = appConfig?.location?.short || "Abuja, Nigeria";
+  const supportPhone = appConfig?.contact?.phone || "+234 9 291 0482";
+  const supportEmail = appConfig?.contact?.support_email || "support@fylo.ng";
+  const securityEmail = appConfig?.contact?.security_email || "security@fylo.ng";
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0b1523] text-white selection:bg-teal-400 selection:text-slate-900 font-sans">
@@ -25,7 +33,7 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
               <Link href="/" className="flex items-center space-x-2 group">
                 <img
                   src="/images/logo.svg"
-                  alt="Fylo Logo"
+                  alt={`${appName} Logo`}
                   className="h-9 w-auto transition-transform group-hover:scale-105"
                 />
               </Link>
@@ -174,24 +182,25 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
             {/* Company Info */}
             <div className="lg:col-span-2 space-y-4">
               <Link href="/" className="inline-block">
-                <img src="/images/logo.svg" alt="Fylo Logo" className="h-8 w-auto mb-2" />
+                <img src="/images/logo.svg" alt={`${appName} Logo`} className="h-8 w-auto mb-2" />
               </Link>
               <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
-                Fylo delivers military-grade encrypted cloud storage, seamless team collaboration,
-                and anywhere access. Keep your files organized, protected, and under your control.
+                {appName} is a cloud file storage and document sharing application serving individuals,
+                teams, and businesses in {locationText}. Organize folders, preview documents, and
+                share files with complete access control.
               </p>
               <div className="space-y-2 pt-2 text-sm text-gray-300">
                 <div className="flex items-center space-x-3">
                   <MapPin className="h-4 w-4 text-teal-400 shrink-0" />
-                  <span>San Francisco, CA &amp; Lagos, Nigeria</span>
+                  <span>{appConfig?.location?.full || "Abuja, Federal Capital Territory (FCT), Nigeria"}</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="h-4 w-4 text-teal-400 shrink-0" />
-                  <span>+1 (800) 555-FYLO / +234 1 234 5678</span>
+                  <span>{supportPhone}</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Mail className="h-4 w-4 text-teal-400 shrink-0" />
-                  <span>support@fylo.storage</span>
+                  <span>{supportEmail}</span>
                 </div>
               </div>
             </div>
@@ -209,7 +218,7 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
                 </li>
                 <li>
                   <Link href="/pricing" className="hover:text-teal-300 transition">
-                    Plans &amp; Pricing
+                    Plans &amp; Pricing (₦)
                   </Link>
                 </li>
                 <li>
@@ -238,16 +247,16 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
                 </li>
                 <li>
                   <Link href="/contact" className="hover:text-teal-300 transition">
-                    Contact Us
+                    Contact Support
                   </Link>
                 </li>
                 <li>
                   <a
-                    href="mailto:security@fylo.storage"
+                    href={`mailto:${securityEmail}`}
                     className="hover:text-teal-300 transition flex items-center space-x-1"
                   >
                     <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
-                    <span>Security Center</span>
+                    <span>Security Disclosure</span>
                   </a>
                 </li>
               </ul>
@@ -271,7 +280,7 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
                 </li>
                 <li>
                   <span className="text-xs text-gray-500 block pt-2">
-                    Compliant with NDPR &amp; GDPR standards.
+                    Aligned with Nigeria Data Protection Act (NDPA) guidelines.
                   </span>
                 </li>
               </ul>
@@ -279,7 +288,9 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
           </div>
 
           <div className="pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Fylo Cloud Storage Inc. All rights reserved.</p>
+            <p>
+              &copy; {new Date().getFullYear()} {appName} ({locationText}). All rights reserved.
+            </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/privacy" className="hover:text-gray-400">
                 Privacy
@@ -288,7 +299,7 @@ export default function HomeLayout({ title, children }: HomeLayoutProps) {
                 Terms
               </Link>
               <Link href="/contact" className="hover:text-gray-400">
-                Security
+                Support
               </Link>
             </div>
           </div>

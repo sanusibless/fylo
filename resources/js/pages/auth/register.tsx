@@ -56,7 +56,7 @@ export default function Register() {
     };
 
     return (
-        <AuthLayout title="Create your free account" description="Get 10 GB secure cloud storage instantly">
+        <AuthLayout title="Create your free account" description="Get 5 GB secure cloud storage instantly">
             <Head title="Register" />
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -71,7 +71,7 @@ export default function Register() {
                         required
                         autoFocus
                         tabIndex={1}
-                        placeholder="e.g. Alex Morgan"
+                        placeholder="e.g. Chinedu Okafor"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500"
@@ -89,7 +89,7 @@ export default function Register() {
                         type="email"
                         required
                         tabIndex={2}
-                        placeholder="alex@example.com"
+                        placeholder="chinedu@example.com"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500"
@@ -109,7 +109,7 @@ export default function Register() {
                         id="phone"
                         type="tel"
                         tabIndex={3}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="+234 803 000 0000"
                         value={data.phone}
                         onChange={(e) => setData('phone', e.target.value)}
                         className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500"

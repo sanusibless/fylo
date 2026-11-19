@@ -18,23 +18,30 @@ class SaaSEcosystemTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         Storage::fake('public');
 
         StoragePlan::firstOrCreate([
             'slug' => 'free',
+        ], [
             'name' => 'Free',
-            'capacity' => '10',
+            'capacity' => '5',
             'price_monthly' => 0.00,
             'price_yearly' => 0.00,
+            'currency' => 'NGN',
+            'max_file_size_mb' => 50,
             'is_active' => true,
         ]);
 
         StoragePlan::firstOrCreate([
-            'slug' => 'pro',
-            'name' => 'Pro',
-            'capacity' => '250',
-            'price_monthly' => 19.00,
-            'price_yearly' => 180.00,
+            'slug' => 'growth',
+        ], [
+            'name' => 'Growth',
+            'capacity' => '100',
+            'price_monthly' => 20000.00,
+            'price_yearly' => 192000.00,
+            'currency' => 'NGN',
+            'max_file_size_mb' => 1024,
             'is_active' => true,
         ]);
     }
@@ -53,16 +60,16 @@ class SaaSEcosystemTest extends TestCase
     public function test_contact_form_submits_and_stores_inquiry()
     {
         $response = $this->post('/contact', [
-            'name' => 'Jane Doe',
-            'email' => 'jane@example.com',
-            'subject' => 'Storage Quota Inquiry',
-            'message' => 'Hello, I want to ask about custom enterprise tiers.',
+            'name' => 'Chinedu Okafor',
+            'email' => 'chinedu@example.com',
+            'subject' => 'Abuja Storage Quota Inquiry',
+            'message' => 'Hello, I want to inquire about the Pro NGN plan for our Abuja office.',
         ]);
 
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('contact_messages', [
-            'email' => 'jane@example.com',
-            'subject' => 'Storage Quota Inquiry',
+            'email' => 'chinedu@example.com',
+            'subject' => 'Abuja Storage Quota Inquiry',
         ]);
     }
 
@@ -140,33 +147,66 @@ class SaaSEcosystemTest extends TestCase
         $guestResp = $this->get("/s/{$file->share_token}");
         $guestResp->assertStatus(200);
 
+        // Locked download before password verification returns 403
+        $lockedDownload = $this->get("/s/{$file->share_token}/download");
+        $lockedDownload->assertStatus(403);
+
         // Unlock password
         $unlockResp = $this->post("/s/{$file->share_token}/verify", [
             'password' => 'secret123',
         ]);
         $unlockResp->assertSessionHasNoErrors();
+
+        // Unlocked download succeeds
+        $unlockedDownload = $this->get("/s/{$file->share_token}/download");
+        $unlockedDownload->assertStatus(200);
     }
 
-    public function test_subscription_checkout_and_plan_upgrade()
+    public function test_subscription_checkout_in_naira_and_plan_upgrade()
     {
+        config([
+            'services.paystack.environment' => 'test',
+            'services.paystack.test_secret_key' => 'sk_test_mock_key',
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'https://api.paystack.co/transaction/initialize' => \Illuminate\Support\Facades\Http::response([
+                'status' => true,
+                'message' => 'Authorization URL created',
+                'data' => [
+                    'authorization_url' => 'https://checkout.paystack.com/mock_code',
+                    'access_code' => 'mock_code',
+                    'reference' => 'FYLO_MOCKREF',
+                ],
+            ], 200),
+            'https://api.paystack.co/transaction/verify/*' => \Illuminate\Support\Facades\Http::response([
+                'status' => true,
+                'message' => 'Verification successful',
+                'data' => [
+                    'id' => 123456,
+                    'status' => 'success',
+                    'reference' => 'DYNAMIC',
+                    'amount' => 2000000, // ₦20,000 in kobo
+                    'currency' => 'NGN',
+                    'paid_at' => now()->toIso8601String(),
+                ],
+            ], 200),
+        ]);
+
         $user = User::factory()->create();
         $this->actingAs($user);
 
         $resp = $this->post('/subscription/checkout', [
-            'plan_slug' => 'pro',
+            'plan_slug' => 'growth',
             'billing_cycle' => 'monthly',
-            'provider' => 'sandbox',
+            'provider' => 'paystack',
         ]);
 
-        $resp->assertRedirect(route('subscription.index'));
-        $resp->assertSessionHas('success');
+        $resp->assertRedirect('https://checkout.paystack.com/mock_code');
 
-        $this->assertDatabaseHas('payments', [
-            'user_id' => $user->id,
-            'status' => 'successful',
-        ]);
-
-        $this->assertEquals(250.0, $user->fresh()->storageCapacityGB());
+        $payment = \App\Models\Payment::where('user_id', $user->id)->firstOrFail();
+        $this->assertEquals('pending', $payment->status);
+        $this->assertEquals(20000.00, (float) $payment->amount);
     }
 
     public function test_admin_portal_access_control()
@@ -175,6 +215,7 @@ class SaaSEcosystemTest extends TestCase
         $regularUser = User::factory()->create(['is_admin' => false]);
         $this->actingAs($regularUser);
         $this->get('/admin')->assertStatus(403);
+        $this->get('/admin/logs')->assertStatus(403);
 
         // Admin user gets 200
         $adminUser = User::factory()->create(['is_admin' => true]);

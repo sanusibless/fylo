@@ -1,10 +1,9 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Head, Link, router } from "@inertiajs/react";
+import { formatCurrency } from "@/lib/utils";
 import {
-  CreditCard,
   Search,
-  Filter,
   ArrowLeft,
   CheckCircle2,
   Clock,
@@ -34,7 +33,7 @@ export default function AdminPayments({ payments, filters }: AdminPaymentsProps)
 
   return (
     <DashboardLayout>
-      <Head title="Payment Transactions - Admin Console" />
+      <Head title="Payment Transactions (₦) - Admin Console" />
 
       <div className="space-y-6">
         {/* Header */}
@@ -86,7 +85,7 @@ export default function AdminPayments({ payments, filters }: AdminPaymentsProps)
                 <th className="py-3.5 px-4 font-semibold text-white">Reference</th>
                 <th className="py-3.5 px-4 font-semibold text-white">Customer</th>
                 <th className="py-3.5 px-4 font-semibold text-white">Plan</th>
-                <th className="py-3.5 px-4 font-semibold text-white">Amount</th>
+                <th className="py-3.5 px-4 font-semibold text-white">Amount (₦)</th>
                 <th className="py-3.5 px-4 font-semibold text-white">Billing Cycle</th>
                 <th className="py-3.5 px-4 font-semibold text-white">Gateway</th>
                 <th className="py-3.5 px-4 font-semibold text-white">Status</th>
@@ -110,7 +109,7 @@ export default function AdminPayments({ payments, filters }: AdminPaymentsProps)
                     </td>
                     <td className="py-3.5 px-4 font-medium text-white">{p.plan?.name || "Storage Plan"}</td>
                     <td className="py-3.5 px-4 font-bold text-white">
-                      {p.currency} {Number(p.amount).toFixed(2)}
+                      {formatCurrency(p.amount)}
                     </td>
                     <td className="py-3.5 px-4 capitalize">{p.billing_cycle}</td>
                     <td className="py-3.5 px-4 capitalize">{p.provider}</td>
@@ -131,7 +130,7 @@ export default function AdminPayments({ payments, filters }: AdminPaymentsProps)
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-gray-400 font-mono">
-                      {new Date(p.created_at).toLocaleDateString()}
+                      {new Date(p.created_at).toLocaleDateString("en-NG")}
                     </td>
                   </tr>
                 ))

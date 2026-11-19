@@ -8,6 +8,7 @@ import {
   Folder,
   CreditCard,
   Shield,
+  Settings,
   X,
   ExternalLink,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Link, usePage } from "@inertiajs/react";
 import UploadFile from "./UploadFile";
+import { formatStorageGB } from "@/lib/utils";
 import { type StorageUsage, type SharedData } from "@/types";
 
 interface DashboardSidebarProps {
@@ -42,6 +44,7 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
     { name: "Shared with Me", href: "/shared-files", icon: Users },
     { name: "Trash", href: "/trash", icon: Trash2 },
     { name: "Subscription", href: "/subscription", icon: CreditCard },
+    { name: "Settings", href: "/settings/profile", icon: Settings },
   ];
 
   return (
@@ -85,7 +88,10 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
         {/* Navigation Items */}
         <nav className="px-3 space-y-1 flex-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive = currentPath === item.href || (item.href !== '/dashboard' && currentPath.startsWith(item.href));
+            const isActive =
+              currentPath === item.href ||
+              (item.href === '/settings/profile' && currentPath.startsWith('/settings')) ||
+              (item.href !== '/dashboard' && item.href !== '/settings/profile' && currentPath.startsWith(item.href));
             return (
               <Link
                 key={item.name}
@@ -142,7 +148,7 @@ export function DashboardSidebar({ isOpen, onToggle, storage }: DashboardSidebar
             </div>
 
             <div className="flex justify-between text-[11px] text-gray-400 font-mono">
-              <span>{totalUsed.toFixed(2)} GB used</span>
+              <span>{formatStorageGB(totalUsed, effectiveStorage?.totalUsedBytes)} used</span>
               <span>{totalAvailable >= 9999 ? 'Unlimited' : `${totalAvailable} GB`}</span>
             </div>
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\File;
+use App\Models\Folder;
 use App\Models\SharedFile;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -14,43 +15,89 @@ class FileService extends GeneralService
 {
     protected $name = 'FileService';
 
-    public function storeFile($user_id, UploadedFile $file, $folder = 'uploads')
+    public function storeFile($user_id, UploadedFile $file, $folder = 'uploads', ?int $folder_id = null)
     {
         try {
-            $user = User::find($user_id);
-            if (! $user) {
-                return $this->serviceResponse(false, 'User not found', null);
-            }
+            return DB::transaction(function () use ($user_id, $file, $folder, $folder_id) {
+                $user = User::lockForUpdate()->find($user_id);
+                if (! $user) {
+                    return $this->serviceResponse(false, 'User not found', null);
+                }
 
-            if (! $user->hasAvailableStorageFor($file->getSize())) {
-                return $this->serviceResponse(false, 'Storage quota exceeded. Please upgrade your storage plan.', null);
-            }
+                $fileSize = (int) $file->getSize();
+                if (! $user->hasAvailableStorageFor($fileSize)) {
+                    return $this->serviceResponse(false, 'Storage quota exceeded. Please upgrade your storage plan or free up space.', null);
+                }
 
-            $base_url = rtrim(config('app.url'), '/');
-            $originalName = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION);
-            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-            $sanitizedDisplayName = Str::slug($baseName).($extension ? '.'.strtolower($extension) : '');
-            if (empty($sanitizedDisplayName)) {
-                $sanitizedDisplayName = 'file_'.time().($extension ? '.'.strtolower($extension) : '');
-            }
+                // Verify folder ownership if folder_id is provided
+                $resolvedFolderId = null;
+                if ($folder_id) {
+                    $targetFolder = Folder::where('id', $folder_id)->where('user_id', $user_id)->first();
+                    if (! $targetFolder) {
+                        return $this->serviceResponse(false, 'Selected destination folder does not exist or does not belong to you.', null);
+                    }
+                    $resolvedFolderId = $targetFolder->id;
+                }
 
-            $storageFileName = (string) Str::uuid().($extension ? '.'.strtolower($extension) : '');
-            $storedPath = $file->storeAs($folder, $storageFileName, 'public');
+                $base_url = rtrim(config('app.url'), '/');
+                $originalName = $file->getClientOriginalName();
+                $extension = strtolower($file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION));
+                $baseName = pathinfo($originalName, PATHINFO_FILENAME);
 
-            $fileRecord = File::create([
-                'user_id' => $user_id,
-                'name' => $sanitizedDisplayName,
-                'type' => getFileType($extension),
-                'size' => $file->getSize(),
-                'base_url' => $base_url,
-                'full_path' => $base_url.'/storage/'.$storedPath,
-                'relative_path' => '/storage/'.$storedPath,
-            ]);
+                // Prevent dangerous executable extensions
+                $allowedExtensions = config('fylo.storage.allowed_extensions', []);
+                if (! empty($allowedExtensions) && ! in_array($extension, $allowedExtensions, true)) {
+                    return $this->serviceResponse(false, "File extension .{$extension} is not permitted.", null);
+                }
 
-            activity()->causedBy($user_id)->log("You uploaded {$sanitizedDisplayName}");
+                $slugBase = Str::slug($baseName);
+                if (empty($slugBase)) {
+                    $slugBase = 'file_'.time();
+                }
+                $sanitizedDisplayName = $slugBase.($extension ? '.'.$extension : '');
 
-            return $this->serviceResponse(true, 'File uploaded successfully', $fileRecord);
+                // Deduplicate display name within the same folder for this user
+                $counter = 1;
+                $candidateName = $sanitizedDisplayName;
+                while (
+                    File::where('user_id', $user_id)
+                        ->where('folder_id', $resolvedFolderId)
+                        ->where('name', $candidateName)
+                        ->exists()
+                ) {
+                    $candidateName = "{$slugBase}-{$counter}".($extension ? '.'.$extension : '');
+                    $counter++;
+                }
+                $sanitizedDisplayName = $candidateName;
+
+                $storageDisk = config('fylo.storage.disk', 'local');
+                $storageFileName = (string) Str::uuid().($extension ? '.'.$extension : '');
+                $storedPath = $file->storeAs($folder, $storageFileName, $storageDisk);
+
+                if (! $storedPath) {
+                    return $this->serviceResponse(false, 'Failed to write file to storage disk.', null);
+                }
+
+                $mimeType = $file->getClientMimeType() ?: $file->getMimeType() ?: 'application/octet-stream';
+
+                $fileRecord = File::create([
+                    'user_id' => $user_id,
+                    'folder_id' => $resolvedFolderId,
+                    'name' => $sanitizedDisplayName,
+                    'type' => getFileType($extension),
+                    'mime_type' => $mimeType,
+                    'extension' => $extension,
+                    'size' => $fileSize,
+                    'base_url' => $base_url,
+                    'full_path' => $base_url.'/storage/'.$storedPath,
+                    'relative_path' => '/storage/'.$storedPath,
+                    'storage_disk' => $storageDisk,
+                ]);
+
+                activity()->causedBy($user_id)->log("You uploaded {$sanitizedDisplayName}");
+
+                return $this->serviceResponse(true, 'File uploaded successfully', $fileRecord);
+            });
         } catch (\Throwable $th) {
             $this->logError($th);
         }
@@ -58,21 +105,22 @@ class FileService extends GeneralService
         return $this->serviceResponse(false, 'Unable to upload file', null);
     }
 
-    public function setAsFavouriteFile($file_uuid)
+    public function setAsFavouriteFile($file_uuid, ?int $auth_id = null)
     {
         try {
-            $file = File::where('uuid', $file_uuid)->first();
+            $userId = $auth_id ?? auth()->id();
+            $file = File::where('uuid', $file_uuid)->where('user_id', $userId)->first();
             if (! $file) {
-                return $this->serviceResponse(false, 'File not found', null);
+                return $this->serviceResponse(false, 'File not found or unauthorized', null);
             }
             $file->update([
                 'is_favorite' => ! $file->is_favorite,
             ]);
 
-            activity()->causedBy(auth()->id())->log("You set {$file->name} as ".($file->is_favorite ? 'favourite' : 'unfavourite').' file');
+            activity()->causedBy($userId)->log("You set {$file->name} as ".($file->is_favorite ? 'starred' : 'unstarred'));
 
             return $this->serviceResponse(true, '', [
-                'starred' => $file->is_favorite,
+                'starred' => (bool) $file->is_favorite,
                 'message' => $file->is_favorite ? 'File starred successfully' : 'File unstarred successfully',
             ]);
         } catch (\Throwable $th) {
@@ -133,9 +181,10 @@ class FileService extends GeneralService
             }
             if ($file->user_id == $auth_id) {
                 $former_name = $file->name;
-                $extension = pathinfo($former_name, PATHINFO_EXTENSION);
+                $extension = $file->extension ?: pathinfo($former_name, PATHINFO_EXTENSION);
                 $baseName = pathinfo($name, PATHINFO_FILENAME);
-                $new_name = Str::slug($baseName).($extension ? '.'.strtolower($extension) : '');
+                $slugBase = Str::slug($baseName) ?: 'file';
+                $new_name = $slugBase.($extension ? '.'.strtolower($extension) : '');
 
                 $file->update([
                     'name' => $new_name,
@@ -143,7 +192,7 @@ class FileService extends GeneralService
 
                 activity()->causedBy($auth_id)->log("You renamed {$former_name} to {$new_name}");
 
-                return $this->serviceResponse(true, 'File name updated successfully', null);
+                return $this->serviceResponse(true, 'File name updated successfully', $file);
             }
 
             return $this->serviceResponse(false, "You don't have permission to update this file", null);
@@ -180,18 +229,26 @@ class FileService extends GeneralService
     public function restoreFile($auth_id, $file_uuid)
     {
         try {
-            $file = File::onlyTrashed()->where('uuid', $file_uuid)->first();
-            if (! $file) {
-                return $this->serviceResponse(false, 'File not found in Trash', null);
-            }
-            if ($file->user_id == $auth_id) {
+            return DB::transaction(function () use ($auth_id, $file_uuid) {
+                $user = User::lockForUpdate()->find($auth_id);
+                $file = File::onlyTrashed()->where('uuid', $file_uuid)->first();
+                if (! $file) {
+                    return $this->serviceResponse(false, 'File not found in Trash', null);
+                }
+                if ($file->user_id != $auth_id) {
+                    return $this->serviceResponse(false, "You don't have permission to restore this file", null);
+                }
+
+                // If trash does not consume quota, verify restoring won't exceed quota
+                if (! config('fylo.storage.trash_consumes_quota', false) && $user && ! $user->hasAvailableStorageFor((int) $file->size)) {
+                    return $this->serviceResponse(false, 'Restoring this file would exceed your storage quota. Please free up space or upgrade your plan.', null);
+                }
+
                 $file->restore();
                 activity()->causedBy($auth_id)->log("You restored {$file->name} from Trash");
 
                 return $this->serviceResponse(true, 'File restored successfully', null);
-            }
-
-            return $this->serviceResponse(false, "You don't have permission to restore this file", null);
+            });
         } catch (\Throwable $th) {
             $this->logError($th);
         }
@@ -205,12 +262,18 @@ class FileService extends GeneralService
             DB::beginTransaction();
             $file = File::withTrashed()->where('uuid', $file_uuid)->first();
             if (! $file) {
+                DB::rollBack();
+
                 return $this->serviceResponse(false, 'File not found', null);
             }
             if ($file->user_id == $auth_id) {
                 $fileName = $file->name;
-                $diskPath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
-                if (Storage::disk('public')->exists($diskPath)) {
+                $diskPath = $file->resolveDiskPath();
+                $disk = $file->resolveStorageDisk();
+                if (Storage::disk($disk)->exists($diskPath)) {
+                    Storage::disk($disk)->delete($diskPath);
+                }
+                if ($disk !== 'public' && Storage::disk('public')->exists($diskPath)) {
                     Storage::disk('public')->delete($diskPath);
                 }
                 SharedFile::where('file_id', $file->id)->delete();
@@ -221,6 +284,8 @@ class FileService extends GeneralService
 
                 return $this->serviceResponse(true, 'File permanently deleted', null);
             }
+
+            DB::rollBack();
 
             return $this->serviceResponse(false, "You don't have permission to permanently delete this file", null);
         } catch (\Throwable $th) {
@@ -237,8 +302,12 @@ class FileService extends GeneralService
             DB::beginTransaction();
             $trashedFiles = File::onlyTrashed()->where('user_id', $auth_id)->get();
             foreach ($trashedFiles as $file) {
-                $diskPath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
-                if (Storage::disk('public')->exists($diskPath)) {
+                $diskPath = $file->resolveDiskPath();
+                $disk = $file->resolveStorageDisk();
+                if (Storage::disk($disk)->exists($diskPath)) {
+                    Storage::disk($disk)->delete($diskPath);
+                }
+                if ($disk !== 'public' && Storage::disk('public')->exists($diskPath)) {
                     Storage::disk('public')->delete($diskPath);
                 }
                 SharedFile::where('file_id', $file->id)->delete();

@@ -8,12 +8,10 @@ import {
   MoreVertical,
   Edit2,
   Trash2,
-  HardDrive,
-  Files,
   Search,
   Grid,
   List,
-  Sparkles,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import FileCard from "@/components/FileCard";
+import UploadFile from "@/components/dashboard/UploadFile";
 import { type FileItem, type FolderItem, type PaginatedData } from "@/types";
 
 interface FoldersProps {
@@ -51,6 +50,7 @@ export default function Folders({
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<FolderItem | null>(null);
 
   const { data: createData, setData: setCreateData, post: postCreate, processing: createProcessing, reset: resetCreate } = useForm({
@@ -85,7 +85,7 @@ export default function Folders({
   };
 
   const handleDeleteFolder = (folder: FolderItem) => {
-    if (confirm(`Are you sure you want to delete folder '${folder.name}'? Files inside will be unassigned or moved to trash.`)) {
+    if (confirm(`Delete folder '${folder.name}'? Any files inside will be safely moved to the parent directory.`)) {
       router.delete(`/folders/${folder.uuid}`);
     }
   };
@@ -99,7 +99,7 @@ export default function Folders({
   );
 
   return (
-    <DashboardLayout>
+    <DashboardLayout onSearch={setSearch}>
       <Head title={currentFolder ? `${currentFolder.name} - Folders` : "My Folders - Fylo"} />
 
       <div className="space-y-6">
@@ -131,8 +131,20 @@ export default function Folders({
             </h1>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
+            {currentFolder && (
+              <Button
+                type="button"
+                onClick={() => setUploadDialogOpen(true)}
+                className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-semibold text-xs px-4 py-2 rounded-xl"
+              >
+                <Upload className="w-4 h-4 mr-1.5 text-teal-400" />
+                <span>Upload to Folder</span>
+              </Button>
+            )}
+
             <Button
+              type="button"
               onClick={() => {
                 setCreateData("parent_uuid", currentFolder?.uuid || "");
                 setCreateDialogOpen(true);
@@ -162,7 +174,9 @@ export default function Folders({
             <button
               type="button"
               onClick={() => setView("grid")}
-              className={`p-1.5 rounded ${view === "grid" ? "bg-teal-400 text-slate-950 font-bold" : "text-gray-400 hover:text-white"}`}
+              className={`p-1.5 rounded ${
+                view === "grid" ? "bg-teal-400 text-slate-950 font-bold" : "text-gray-400 hover:text-white"
+              }`}
               title="Grid View"
             >
               <Grid className="w-4 h-4" />
@@ -170,7 +184,9 @@ export default function Folders({
             <button
               type="button"
               onClick={() => setView("list")}
-              className={`p-1.5 rounded ${view === "list" ? "bg-teal-400 text-slate-950 font-bold" : "text-gray-400 hover:text-white"}`}
+              className={`p-1.5 rounded ${
+                view === "list" ? "bg-teal-400 text-slate-950 font-bold" : "text-gray-400 hover:text-white"
+              }`}
               title="List View"
             >
               <List className="w-4 h-4" />
@@ -186,7 +202,7 @@ export default function Folders({
 
           {filteredFolders.length === 0 ? (
             <div className="p-8 text-center rounded-2xl bg-[#202a3c]/40 border border-slate-800/80 text-gray-400 text-xs">
-              No subfolders in this directory. Click "New Folder" to create one.
+              No subfolders in this directory. Click &ldquo;New Folder&rdquo; to create one.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -213,7 +229,7 @@ export default function Folders({
                         {folder.name}
                       </p>
                       <p className="text-[11px] text-gray-400">
-                        {folder.files_count || 0} items
+                        {folder.files_count || 0} {folder.files_count === 1 ? "file" : "files"}
                       </p>
                     </div>
                   </Link>
@@ -233,7 +249,7 @@ export default function Folders({
                         }}
                       >
                         <Edit2 className="w-4 h-4 mr-2 text-teal-400" />
-                        <span>Rename</span>
+                        <span>Rename &amp; Color</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-rose-400 focus:text-rose-300"
@@ -253,12 +269,12 @@ export default function Folders({
         {/* Files Inside This Folder */}
         <div className="pt-4">
           <h3 className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-3">
-            Files ({filteredFiles.length})
+            Files in {currentFolder ? currentFolder.name : "Root Drive"} ({filteredFiles.length})
           </h3>
 
           {filteredFiles.length === 0 ? (
             <div className="p-10 text-center rounded-2xl bg-[#202a3c]/40 border border-slate-800/80 text-gray-400 text-xs">
-              No files currently stored directly in this folder.
+              No files stored directly in this folder.
             </div>
           ) : view === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -276,6 +292,14 @@ export default function Folders({
         </div>
       </div>
 
+      {/* Upload into current folder modal */}
+      <UploadFile
+        folderId={currentFolder?.id || null}
+        hideTrigger
+        externalOpen={uploadDialogOpen}
+        onExternalOpenChange={setUploadDialogOpen}
+      />
+
       {/* Create Folder Modal */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="bg-[#1c2431] border border-slate-700 text-white">
@@ -288,7 +312,7 @@ export default function Folders({
               <Input
                 required
                 autoFocus
-                placeholder="e.g. Design Assets"
+                placeholder="e.g. Project Deliverables"
                 value={createData.name}
                 onChange={(e) => setCreateData("name", e.target.value)}
                 className="mt-1 bg-[#0b1523] border-slate-700 text-white text-xs"
@@ -335,7 +359,7 @@ export default function Folders({
       <Dialog open={!!editingFolder} onOpenChange={(open) => !open && setEditingFolder(null)}>
         <DialogContent className="bg-[#1c2431] border border-slate-700 text-white">
           <DialogHeader>
-            <DialogTitle>Rename Folder</DialogTitle>
+            <DialogTitle>Edit Folder</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
             <div>
@@ -347,6 +371,22 @@ export default function Folders({
                 onChange={(e) => setEditData("name", e.target.value)}
                 className="mt-1 bg-[#0b1523] border-slate-700 text-white text-xs"
               />
+            </div>
+            <div>
+              <Label className="text-xs text-gray-300">Folder Color Tag</Label>
+              <div className="flex items-center space-x-3 mt-1.5">
+                {["#2dd4bf", "#38bdf8", "#818cf8", "#f472b6", "#fbbf24", "#34d399"].map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setEditData("color", color)}
+                    style={{ backgroundColor: color }}
+                    className={`w-7 h-7 rounded-full border-2 transition ${
+                      editData.color === color ? "border-white scale-110" : "border-transparent"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
             <DialogFooter className="pt-2">
               <Button

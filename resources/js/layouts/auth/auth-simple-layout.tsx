@@ -32,7 +32,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                 </div>
 
                 <div className="mt-8 text-center text-xs text-gray-500">
-                    &copy; {new Date().getFullYear()} Fylo Inc. All rights reserved. •{' '}
+                    &copy; {new Date().getFullYear()} Fylo (Abuja, Nigeria). All rights reserved. •{' '}
                     <Link href="/privacy" className="hover:text-gray-400 underline">Privacy</Link> •{' '}
                     <Link href="/terms" className="hover:text-gray-400 underline">Terms</Link>
                 </div>

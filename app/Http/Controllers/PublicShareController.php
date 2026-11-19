@@ -33,12 +33,12 @@ class PublicShareController extends Controller
         return Inertia::render('PublicShare', [
             'file' => [
                 'name' => $file->name,
-                'extension' => $file->extension,
+                'extension' => $file->extension ?: pathinfo($file->name, PATHINFO_EXTENSION),
                 'mime_type' => $file->mime_type,
                 'size_in_mb' => $file->size_in_mb,
                 'size_in_kb' => $file->size_in_kb,
                 'total_downloads' => $file->total_downloads,
-                'created_at' => $file->created_at->toFormattedDateString(),
+                'created_at' => $file->created_at?->toFormattedDateString() ?? 'Recently',
                 'expires_at' => $file->share_expires_at?->diffForHumans(),
                 'uploader_name' => $file->user?->name ?? 'Fylo User',
             ],
@@ -80,15 +80,16 @@ class PublicShareController extends Controller
             abort(403, 'Password verification required.');
         }
 
-        $relativeStoragePath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
+        $diskPath = $file->resolveDiskPath();
+        $disk = $file->resolveStorageDisk();
 
-        if (! Storage::disk('public')->exists($relativeStoragePath)) {
+        if (! Storage::disk($disk)->exists($diskPath)) {
             abort(404, 'File not found on cloud storage.');
         }
 
         $file->increaseDownloads();
 
-        return Storage::disk('public')->download($relativeStoragePath, $file->name);
+        return Storage::disk($disk)->download($diskPath, $file->name);
     }
 
     public function preview(string $token)
@@ -105,17 +106,43 @@ class PublicShareController extends Controller
             abort(403, 'Password verification required.');
         }
 
-        $relativeStoragePath = ltrim(str_replace('/storage/', '', $file->relative_path), '/');
+        $diskPath = $file->resolveDiskPath();
+        $disk = $file->resolveStorageDisk();
 
-        if (! Storage::disk('public')->exists($relativeStoragePath)) {
+        if (! Storage::disk($disk)->exists($diskPath)) {
             abort(404, 'File not found on cloud storage.');
         }
 
-        $filePath = Storage::disk('public')->path($relativeStoragePath);
+        $filePath = Storage::disk($disk)->path($diskPath);
+        $ext = strtolower($file->extension ?: pathinfo($file->name, PATHINFO_EXTENSION));
+
+        $safeInlineMimes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'pdf' => 'application/pdf',
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'mov' => 'video/quicktime',
+            'mp3' => 'audio/mpeg',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            'm4a' => 'audio/mp4',
+            'txt' => 'text/plain; charset=utf-8',
+            'csv' => 'text/plain; charset=utf-8',
+            'md' => 'text/plain; charset=utf-8',
+            'json' => 'application/json; charset=utf-8',
+        ];
+
+        $contentType = $safeInlineMimes[$ext] ?? 'application/octet-stream';
+        $disposition = isset($safeInlineMimes[$ext]) ? 'inline' : 'attachment';
 
         return response()->file($filePath, [
-            'Content-Type' => $file->mime_type ?: 'application/octet-stream',
-            'Content-Disposition' => 'inline; filename="'.$file->name.'"',
+            'Content-Type' => $contentType,
+            'Content-Disposition' => $disposition.'; filename="'.addslashes($file->name).'"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

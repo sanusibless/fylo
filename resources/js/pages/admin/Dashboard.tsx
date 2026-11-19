@@ -1,5 +1,6 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
+import { formatCurrency } from "@/lib/utils";
 import {
   Users,
   HardDrive,
@@ -8,11 +9,7 @@ import {
   TrendingUp,
   Shield,
   MessageSquare,
-  ArrowRight,
-  ExternalLink,
-  CheckCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface AdminDashboardProps {
   metrics: {
@@ -63,8 +60,8 @@ export default function AdminDashboard({
       bg: "bg-amber-500/10",
     },
     {
-      title: "Monthly Revenue (MRR)",
-      value: `$${metrics.monthlyRevenue.toFixed(2)}`,
+      title: "30-Day Revenue (₦)",
+      value: formatCurrency(metrics.monthlyRevenue),
       icon: CreditCard,
       color: "text-emerald-400",
       bg: "bg-emerald-500/10",
@@ -81,7 +78,7 @@ export default function AdminDashboard({
           <div>
             <div className="flex items-center space-x-2 text-xs text-amber-400 font-semibold mb-1">
               <Shield className="w-4 h-4" />
-              <span>System Administrator Control Panel</span>
+              <span>System Administrator Control Panel • Abuja, Nigeria</span>
             </div>
             <h1 className="text-2xl font-bold text-white">Platform Health &amp; Analytics</h1>
           </div>
@@ -97,7 +94,7 @@ export default function AdminDashboard({
               href="/admin/plans"
               className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-slate-700 transition"
             >
-              Storage Plans
+              Storage Plans (₦)
             </Link>
             <Link
               href="/admin/payments"
@@ -167,7 +164,7 @@ export default function AdminDashboard({
                         )}
                       </td>
                       <td className="py-2.5 text-gray-400">
-                        {new Date(u.created_at).toLocaleDateString()}
+                        {new Date(u.created_at).toLocaleDateString("en-NG")}
                       </td>
                     </tr>
                   ))}
@@ -179,7 +176,7 @@ export default function AdminDashboard({
           {/* Recent Transactions */}
           <div className="bg-[#202a3c] p-6 rounded-3xl border border-slate-800 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white">Recent Transactions</h3>
+              <h3 className="text-base font-bold text-white">Recent Transactions (₦)</h3>
               <Link href="/admin/payments" className="text-xs text-teal-400 hover:underline">
                 View All Payments
               </Link>
@@ -191,7 +188,7 @@ export default function AdminDashboard({
                   <tr className="border-b border-slate-800 text-gray-400">
                     <th className="pb-2">Reference</th>
                     <th className="pb-2">User</th>
-                    <th className="pb-2">Amount</th>
+                    <th className="pb-2">Amount (₦)</th>
                     <th className="pb-2">Status</th>
                   </tr>
                 </thead>
@@ -208,7 +205,7 @@ export default function AdminDashboard({
                         <td className="py-2.5 font-mono text-teal-300 text-[11px]">{p.reference}</td>
                         <td className="py-2.5 text-white">{p.user?.name || "User"}</td>
                         <td className="py-2.5 font-semibold text-white">
-                          {p.currency} {Number(p.amount).toFixed(2)}
+                          {formatCurrency(p.amount)}
                         </td>
                         <td className="py-2.5">
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -238,7 +235,7 @@ export default function AdminDashboard({
                   <div className="flex justify-between items-start">
                     <h5 className="font-semibold text-white text-xs">{inq.name}</h5>
                     <span className="text-[10px] text-gray-500">
-                      {new Date(inq.created_at).toLocaleDateString()}
+                      {new Date(inq.created_at).toLocaleDateString("en-NG")}
                     </span>
                   </div>
                   <div className="text-[11px] text-teal-300 font-medium truncate">{inq.subject}</div>

@@ -11,7 +11,6 @@ import {
   Lock,
   ArrowRight,
   CheckCircle2,
-  HardDrive,
   Sparkles,
 } from "lucide-react";
 
@@ -19,117 +18,116 @@ export default function Features() {
   const detailedFeatures = [
     {
       icon: ShieldCheck,
-      title: "1. Secure Cloud Storage",
-      subtitle: "Enterprise-grade encryption at rest and in flight",
+      title: "1. Private & Authenticated File Storage",
+      subtitle: "Strict ownership checks and server-side validation",
       description:
-        "Every file uploaded to Fylo is encrypted using AES-256 cipher specifications. Your encryption keys are strictly partitioned to ensure that only authenticated account holders and explicitly designated recipients can access or decipher stored content.",
+        "Every file uploaded to Fylo is stored in isolated server storage and protected by strict user ownership and access verification. Files cannot be accessed by unauthorized users, and all uploads are validated by extension and size.",
       points: [
-        "AES-256 rest encryption and TLS 1.3 transit security",
-        "Geographically redundant replication across NVMe clusters",
-        "Role-based access verification on every download request",
+        "Server-side ownership verification on every download and preview",
+        "Strict file extension and plan-based upload size validation",
+        "Zero exposure of internal server filesystem paths",
       ],
     },
     {
       icon: FolderSync,
-      title: "2. Easy File Management",
-      subtitle: "Intuitive file operations at your fingertips",
+      title: "2. Comprehensive File Management",
+      subtitle: "Single and multi-file operations built for speed",
       description:
-        "Seamlessly organize thousands of files. Rename documents with instant validation, drag and drop files directly from your desktop, move items between nested folder hierarchies, and delete or restore files in single actions.",
+        "Upload single or multiple files with live progress tracking, rename files while preserving extensions automatically, move items between folders, bookmark starred files, and execute bulk operations in a single click.",
       points: [
-        "Drag-and-drop multi-file upload with live progress tracking",
-        "In-line file renaming with automatic extension safeguarding",
-        "Fast sorting by name, date modified, size, and file type",
+        "Drag-and-drop multi-file upload with progress feedback",
+        "In-line file renaming with automatic extension preservation",
+        "Multi-select bulk move, restore, and delete controls",
       ],
     },
     {
       icon: Share2,
-      title: "3. File Sharing & Tokenized Links",
-      subtitle: "Share with teammates and external clients securely",
+      title: "3. Direct User & Tokenized Link Sharing",
+      subtitle: "Collaborate with teammates or external clients",
       description:
-        "Generate cryptographic share links with optional password protection and configurable expiration timestamps. Revoke sharing links immediately when a project wraps up, or share directly to registered users by their email.",
+        "Share files directly with other registered Fylo users by email, or generate cryptographic public share links with optional password protection and configurable expiration dates.",
       points: [
-        "Password-protected public access links",
-        "Custom expiration date timers (e.g. 24h, 7 days, 30 days)",
-        "Instant one-click access revocation",
+        "Optional password protection on public share links",
+        "Custom link expiration timers (1, 7, 30, or 90 days)",
+        "Instant one-click link revocation from your file manager",
       ],
     },
     {
       icon: Smartphone,
-      title: "4. Anywhere Access",
-      subtitle: "Responsive on every screen and operating system",
+      title: "4. Responsive Cross-Device Interface",
+      subtitle: "Works across desktop, tablet, and mobile browsers",
       description:
-        "Access your complete drive whether you are working on a 4K desktop monitor, MacBook, iPad, or mobile phone. Built with modern progressive web patterns for fast response times and zero installation friction.",
+        "Access your complete cloud drive from any modern browser on Windows, macOS, Linux, iOS, or Android. Switch effortlessly between grid and table layouts on any screen size.",
       points: [
-        "Fluid mobile, tablet, and desktop responsive UI",
-        "Instant cross-device session synchronization",
-        "Fast document retrieval with global low-latency CDN",
+        "Responsive layout optimized for mobile, tablet, and desktop",
+        "Toggle between visual Grid View and compact List View",
+        "Fast navigation with keyboard-friendly dialogs and menus",
       ],
     },
     {
       icon: BarChart3,
-      title: "5. Storage Analytics & Insights",
-      subtitle: "Real-time visibility into your drive capacity",
+      title: "5. Real-Time Storage Quota & Activity Tracking",
+      subtitle: "Clear visibility into your drive usage",
       description:
-        "Monitor your exact storage allocation with high-precision charts. View your storage breakdown across documents, media, and archives, and track download counts to see how your shared files perform.",
+        "Monitor your exact storage consumption against your plan limit, view file counts across categories, track total downloads on your files, and inspect your recent account activity log.",
       points: [
-        "Visual capacity meters and breakdown by file type",
-        "Download counters and activity logs for team visibility",
-        "Automated alerts before reaching storage thresholds",
+        "Live storage quota meter in the sidebar and subscription page",
+        "Download counters updated on every authorized file download",
+        "Chronological activity feed of uploads, renames, shares, and deletions",
       ],
     },
     {
       icon: Folders,
-      title: "6. Automatic & Hierarchical Organization",
-      subtitle: "Infinite nested folders and smart filtering",
+      title: "6. Hierarchical Folder Organization",
+      subtitle: "Nested directories with custom color tags",
       description:
-        "Create structured directories that match your exact company or project organization. Navigate using breadcrumbs, star frequently used files for one-tap retrieval, and filter by recent uploads.",
+        "Create structured folder hierarchies that match your projects or departments. Assign custom color tags to folders, navigate deep hierarchies via breadcrumbs, and filter by file type.",
       points: [
-        "Nested folders with breadcrumb trail navigation",
-        "Starred items quick-access sidebar bookmarking",
-        "Dedicated Recent Files timeline",
+        "Nested folders with full breadcrumb trail navigation",
+        "Color-coded folder icons for visual organization",
+        "Safe folder deletion that preserves inner files by moving them up",
       ],
     },
     {
       icon: Eye,
       title: "7. In-Browser File Preview",
-      subtitle: "Inspect documents and stream media instantly",
+      subtitle: "Inspect documents, code, and media without downloading",
       description:
-        "Don't waste time or local disk space downloading huge files just to inspect them. Fylo features an integrated media player for audio/video, image lightbox, PDF reader, and code/text viewer right in the browser.",
+        "Preview supported files directly inside your browser before downloading. Fylo includes an interactive viewer for images, PDF documents, video and audio streams, and plain text files.",
       points: [
-        "Built-in PDF reader with page controls",
-        "High-definition video streaming & audio playback",
-        "Code, markdown, and text file syntax inspection",
+        "Image lightbox with zoom-in and zoom-out controls",
+        "Embedded PDF document reader and HTML5 video/audio player",
+        "Inline text viewer for TXT, CSV, JSON, and Markdown files",
       ],
     },
     {
       icon: Lock,
-      title: "8. Data Protection & Recycle Bin",
-      subtitle: "Safeguards against accidental loss",
+      title: "8. Recycle Bin & Safe Recovery",
+      subtitle: "Protect against accidental deletions",
       description:
-        "Accidentally deleted an important document? Deleted files reside safely in your Trash bin for 30 days. Easily restore any file back to its original location with full metadata intact, or permanently wipe sensitive files.",
+        "Deleting a file moves it to your Recycle Bin rather than erasing it immediately. Restore deleted files back to your active workspace with one click, or permanently purge them when no longer needed.",
       points: [
-        "Soft-delete safety net for files and folder trees",
-        "One-click restoration of accidentally deleted files",
-        "Configurable retention periods and permanent purge controls",
+        "Soft-delete workflow for all user files",
+        "One-click file restoration with quota verification",
+        "Individual permanent delete or full 'Empty Trash' action",
       ],
     },
   ];
 
   return (
-    <HomeLayout title="Features - Fylo Cloud Storage">
+    <HomeLayout title="Features — Fylo Cloud Storage (Abuja, Nigeria)">
       {/* Header */}
       <section className="py-20 bg-gradient-to-b from-[#0b1523] to-[#1c2431] text-center border-b border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 text-xs font-semibold uppercase tracking-wider mb-6 border border-teal-500/30">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Built For Performance &amp; Privacy</span>
+            <span>Built For Practical Productivity &amp; Privacy</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-6">
-            Everything You Need For A Modern Cloud Drive
+            Every Feature Inside Your Fylo Workspace
           </h1>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Discover the comprehensive suite of storage, organization, sharing, and security features
-            that make Fylo the preferred cloud workspace for over 100,000 users.
+            Explore the core file management, folder organization, inline preview, and secure sharing capabilities built into Fylo for individuals and teams in Abuja, Nigeria.
           </p>
         </div>
       </section>
@@ -152,7 +150,7 @@ export default function Features() {
                   </div>
                   <div className="space-y-2">
                     <span className="text-xs uppercase font-mono text-teal-400 font-semibold">
-                      Enterprise Module {idx + 1}
+                      Core Capability 0{idx + 1}
                     </span>
                     <h4 className="text-xl font-bold text-white">{item.title.split(". ")[1]}</h4>
                   </div>
@@ -185,11 +183,10 @@ export default function Features() {
       <section className="py-20 bg-[#0b1523] border-t border-slate-800 text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-extrabold text-white mb-4">
-            Experience the Future of Cloud Storage Today
+            Start Using Fylo Today
           </h2>
           <p className="text-gray-400 max-w-xl mx-auto mb-8">
-            Create an account in less than 30 seconds and start with 10 GB of free, zero-compromise
-            storage.
+            Create your account in seconds and start with 5 GB of free cloud storage.
           </p>
           <Link
             href="/register"

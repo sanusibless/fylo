@@ -1,4 +1,3 @@
-import { useState } from "react";
 import HomeLayout from "@/layouts/home/layout";
 import { useForm, usePage } from "@inertiajs/react";
 import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, MessageSquare } from "lucide-react";
@@ -6,9 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import InputError from "@/components/input-error";
+import { type SharedData } from "@/types";
 
 export default function Contact() {
-  const { flash } = usePage<{ flash?: { success?: string } }>().props;
+  const { flash, appConfig } = usePage<SharedData>().props;
+
+  const locationFull = appConfig?.location?.full || "Abuja, Federal Capital Territory (FCT), Nigeria";
+  const supportEmail = appConfig?.contact?.support_email || "support@fylo.ng";
+  const salesEmail = appConfig?.contact?.sales_email || "sales@fylo.ng";
+  const supportPhone = appConfig?.contact?.phone || "+234 9 291 0482";
+  const supportHours = appConfig?.contact?.hours || "Monday – Friday, 8:00 AM – 6:00 PM WAT";
 
   const { data, setData, post, processing, errors, reset, recentlySuccessful } = useForm({
     name: "",
@@ -25,20 +31,20 @@ export default function Contact() {
   };
 
   return (
-    <HomeLayout title="Contact Support & Sales - Fylo">
+    <HomeLayout title="Contact Support — Fylo Abuja, Nigeria">
       {/* Header */}
       <section className="py-20 bg-gradient-to-b from-[#0b1523] to-[#1c2431] text-center border-b border-slate-800">
         <div className="max-w-3xl mx-auto px-4">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 text-teal-400 text-xs font-semibold uppercase tracking-wider mb-6 border border-teal-500/30">
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>We're Here To Help</span>
+            <span>Abuja Technical Support &amp; Billing Inquiries</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
             Get in Touch with Fylo
           </h1>
           <p className="text-base text-gray-300 max-w-xl mx-auto">
-            Have questions regarding storage quotas, security compliance, or team enterprise billing?
-            Drop us a message and our technical team will respond in under 2 hours.
+            Have questions regarding storage plans, Naira (₦) billing, or account management?
+            Send us a message and our support team in Abuja, Nigeria will assist you promptly.
           </p>
         </div>
       </section>
@@ -50,22 +56,32 @@ export default function Contact() {
             {/* Left Contact Info */}
             <div className="lg:col-span-5 space-y-8">
               <div>
-                <h3 className="text-2xl font-bold text-white mb-3">Reach Our Global Support</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">Contact Information</h3>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  Our cloud engineers and account managers are situated across multiple time zones to
-                  ensure prompt assistance whenever you need it.
+                  Our support and engineering team operates from Abuja, Federal Capital Territory (FCT),
+                  serving individuals and organizations across Nigeria.
                 </p>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4 p-5 rounded-2xl bg-[#202a3c] border border-slate-800">
                   <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white">Service Location</h4>
+                    <p className="text-xs text-gray-400 mt-1">{locationFull}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-5 rounded-2xl bg-[#202a3c] border border-slate-800">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-white">Direct Email</h4>
-                    <p className="text-xs text-gray-400 mt-1">General: support@fylo.storage</p>
-                    <p className="text-xs text-gray-400">Enterprise: sales@fylo.storage</p>
+                    <p className="text-xs text-gray-400 mt-1">Support: {supportEmail}</p>
+                    <p className="text-xs text-gray-400">Billing &amp; Plans: {salesEmail}</p>
                   </div>
                 </div>
 
@@ -74,9 +90,8 @@ export default function Contact() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-white">Phone Support</h4>
-                    <p className="text-xs text-gray-400 mt-1">+1 (800) 555-FYLO (US / International)</p>
-                    <p className="text-xs text-gray-400">+234 1 234 5678 (West Africa Hub)</p>
+                    <h4 className="text-sm font-semibold text-white">Telephone</h4>
+                    <p className="text-xs text-gray-400 mt-1">{supportPhone} (Abuja, Nigeria)</p>
                   </div>
                 </div>
 
@@ -85,9 +100,9 @@ export default function Contact() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-white">Response Time Guarantee</h4>
-                    <p className="text-xs text-gray-400 mt-1">Free Tier: Within 24 business hours</p>
-                    <p className="text-xs text-teal-300">Pro &amp; Business: 1 hour prioritized response</p>
+                    <h4 className="text-sm font-semibold text-white">Operating Hours</h4>
+                    <p className="text-xs text-gray-400 mt-1">{supportHours}</p>
+                    <p className="text-xs text-teal-300 mt-0.5">Priority support for Pro &amp; Business plans</p>
                   </div>
                 </div>
               </div>
@@ -95,15 +110,15 @@ export default function Contact() {
 
             {/* Right Contact Form */}
             <div className="lg:col-span-7 bg-[#202a3c] p-8 md:p-10 rounded-3xl border border-slate-800 shadow-xl">
-              <h3 className="text-2xl font-bold text-white mb-2">Send us a Message</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Send Us a Message</h3>
               <p className="text-sm text-gray-400 mb-8">
-                Fill in the form below and we'll reply to your provided email address.
+                Complete the form below and our team will reply to your email address.
               </p>
 
               {(recentlySuccessful || flash?.success) && (
                 <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center space-x-3 text-sm">
                   <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-                  <span>{flash?.success || "Your message has been sent successfully!"}</span>
+                  <span>{flash?.success || "Your inquiry has been submitted."}</span>
                 </div>
               )}
 
@@ -117,7 +132,7 @@ export default function Contact() {
                       id="name"
                       type="text"
                       required
-                      placeholder="e.g. Sarah Connor"
+                      placeholder="e.g. Chinedu Okafor"
                       value={data.name}
                       onChange={(e) => setData("name", e.target.value)}
                       className="mt-1.5 bg-[#1c2431] border-slate-700 text-white"
@@ -133,7 +148,7 @@ export default function Contact() {
                       id="email"
                       type="email"
                       required
-                      placeholder="e.g. sarah@example.com"
+                      placeholder="e.g. chinedu@example.com"
                       value={data.email}
                       onChange={(e) => setData("email", e.target.value)}
                       className="mt-1.5 bg-[#1c2431] border-slate-700 text-white"
@@ -150,7 +165,7 @@ export default function Contact() {
                     id="subject"
                     type="text"
                     required
-                    placeholder="e.g. Inquiry regarding Business Plan billing"
+                    placeholder="e.g. Question about Pro Storage Plan billing"
                     value={data.subject}
                     onChange={(e) => setData("subject", e.target.value)}
                     className="mt-1.5 bg-[#1c2431] border-slate-700 text-white"
@@ -166,7 +181,7 @@ export default function Contact() {
                     id="message"
                     rows={5}
                     required
-                    placeholder="How can our team help your workflow today?"
+                    placeholder="How can our team in Abuja help you today?"
                     value={data.message}
                     onChange={(e) => setData("message", e.target.value)}
                     className="w-full mt-1.5 rounded-md bg-[#1c2431] border border-slate-700 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder:text-gray-500"

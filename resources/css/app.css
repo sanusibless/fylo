@@ -64,9 +64,66 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Light Mode Tokens (Active when html does NOT have .dark) */
 :root {
+    color-scheme: light;
+    --background: hsl(210 40% 98%); /* #f8fafc */
+    --foreground: hsl(222 47% 11%); /* #0f172a */
+
+    --card: hsl(0 0% 100%); /* #ffffff */
+    --card-foreground: hsl(222 47% 11%);
+
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+
+    --primary: hsl(175 84% 32%); /* Rich teal #0d9488 */
+    --primary-foreground: hsl(0 0% 100%);
+
+    --secondary: hsl(210 40% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
+
+    --muted: hsl(210 40% 94%);
+    --muted-foreground: hsl(215 16% 45%);
+
+    --accent: hsl(175 84% 32%);
+    --accent-foreground: hsl(0 0% 100%);
+
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 100%);
+
+    --border: hsl(214 32% 88%);
+    --input: hsl(214 32% 88%);
+    --ring: hsl(175 84% 32%);
+
+    --radius: 0.75rem;
+
+    /* Fylo Specific Tokens in Light Mode */
+    --fylo-header: hsl(0 0% 100%);
+    --fylo-main: hsl(210 40% 98%);
+    --fylo-card: hsl(0 0% 100%);
+    --fylo-text-muted: hsl(215 16% 45%);
+
+    /* Sidebar Tokens in Light Mode */
+    --sidebar: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(222 47% 11%);
+    --sidebar-primary: hsl(175 84% 32%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(210 40% 96%);
+    --sidebar-accent-foreground: hsl(222 47% 11%);
+    --sidebar-border: hsl(214 32% 88%);
+    --sidebar-ring: hsl(175 84% 32%);
+
+    /* Chart Tokens */
+    --chart-1: hsl(175 84% 32%);
+    --chart-2: hsl(213 94% 55%);
+    --chart-3: hsl(160 60% 40%);
+    --chart-4: hsl(30 80% 50%);
+    --chart-5: hsl(280 65% 55%);
+}
+
+/* Dark Mode Tokens (Active when html has .dark) */
+.dark {
     color-scheme: dark;
-    /* Fylo Dark SaaS Theme */
     --background: hsl(218 39% 11%); /* #1c2431 */
     --foreground: hsl(0 0% 100%);
 
@@ -95,52 +152,11 @@
     --input: hsl(218 25% 25%);
     --ring: hsl(192 77% 59%);
 
-    --radius: 0.75rem;
-
-    /* Fylo Specific Tokens */
     --fylo-header: hsl(218 54% 8%); /* #0b1523 */
     --fylo-main: hsl(218 39% 11%); /* #1c2431 */
     --fylo-card: hsl(218 33% 16%); /* #202a3c */
     --fylo-text-muted: hsl(220 13% 69%);
 
-    /* Sidebar Tokens */
-    --sidebar: hsl(218 54% 8%);
-    --sidebar-foreground: hsl(0 0% 100%);
-    --sidebar-primary: hsl(192 77% 59%);
-    --sidebar-primary-foreground: hsl(218 39% 11%);
-    --sidebar-accent: hsl(218 33% 16%);
-    --sidebar-accent-foreground: hsl(0 0% 100%);
-    --sidebar-border: hsl(218 25% 25%);
-    --sidebar-ring: hsl(192 77% 59%);
-
-    /* Chart Tokens */
-    --chart-1: hsl(192 77% 59%);
-    --chart-2: hsl(213 94% 68%);
-    --chart-3: hsl(160 60% 45%);
-    --chart-4: hsl(30 80% 55%);
-    --chart-5: hsl(280 65% 60%);
-}
-
-.dark {
-    --background: hsl(218 39% 11%);
-    --foreground: hsl(0 0% 100%);
-    --card: hsl(218 33% 16%);
-    --card-foreground: hsl(0 0% 100%);
-    --popover: hsl(218 33% 16%);
-    --popover-foreground: hsl(0 0% 100%);
-    --primary: hsl(192 77% 59%);
-    --primary-foreground: hsl(218 39% 11%);
-    --secondary: hsl(218 33% 16%);
-    --secondary-foreground: hsl(0 0% 100%);
-    --muted: hsl(218 33% 16%);
-    --muted-foreground: hsl(220 13% 69%);
-    --accent: hsl(192 77% 59%);
-    --accent-foreground: hsl(218 39% 11%);
-    --destructive: hsl(0 84% 60%);
-    --destructive-foreground: hsl(0 0% 100%);
-    --border: hsl(218 25% 25%);
-    --input: hsl(218 25% 25%);
-    --ring: hsl(192 77% 59%);
     --sidebar: hsl(218 54% 8%);
     --sidebar-foreground: hsl(0 0% 100%);
     --sidebar-primary: hsl(192 77% 59%);
@@ -174,4 +190,117 @@
     background: linear-gradient(135deg, hsl(192 77% 59%), hsl(213 94% 68%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   Dashboard Light Mode Theme Overrides (Scoped strictly to .dashboard-scope
+   and Radix portals when html is NOT in .dark mode — Landing pages untouched)
+   ========================================================================== */
+html:not(.dark) .dashboard-scope,
+html:not(.dark) [data-radix-popper-content-wrapper],
+html:not(.dark) [role="dialog"] {
+    color: #0f172a;
+}
+
+/* Surfaces & Backgrounds inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope.bg-\[\#1c2431\],
+html:not(.dark) .dashboard-scope .bg-\[\#1c2431\],
+html:not(.dark) .dashboard-scope .bg-\[\#1c2431\]\/80,
+html:not(.dark) .dashboard-scope .bg-\[\#141b25\]\/60 {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\],
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\]\/70,
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\]\/40,
+html:not(.dark) [role="dialog"].bg-\[\#1c2431\],
+html:not(.dark) [data-radix-popper-content-wrapper] .bg-\[\#1c2431\] {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\],
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/80,
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/70,
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/60,
+html:not(.dark) .dashboard-scope .bg-\[\#080f1a\],
+html:not(.dark) [role="dialog"] .bg-\[\#0b1523\],
+html:not(.dark) [role="dialog"] .bg-\[\#0b1523\]\/60 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-slate-800,
+html:not(.dark) .dashboard-scope .bg-slate-800\/60,
+html:not(.dark) [role="dialog"] .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/60:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/40:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/30:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-700:hover {
+    background-color: #e2e8f0 !important;
+}
+
+/* Dashboard Hero & Summary Gradients in Light Mode */
+html:not(.dark) .dashboard-scope .from-teal-900\/60,
+html:not(.dark) .dashboard-scope .from-\[\#202a3c\] {
+    --tw-gradient-from: #e0f2fe !important;
+    --tw-gradient-via: #f0fdfa !important;
+    --tw-gradient-to: #ffffff !important;
+    background-image: linear-gradient(to right, #e0f2fe, #f0fdfa, #ffffff) !important;
+}
+
+/* Borders & Dividers inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .border-slate-800,
+html:not(.dark) .dashboard-scope .border-slate-800\/80,
+html:not(.dark) .dashboard-scope .border-slate-800\/60,
+html:not(.dark) .dashboard-scope .border-slate-700,
+html:not(.dark) [role="dialog"].border-slate-700,
+html:not(.dark) [role="dialog"] .border-slate-800,
+html:not(.dark) [role="dialog"] .border-slate-700,
+html:not(.dark) [data-radix-popper-content-wrapper] .border-slate-700 {
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .dashboard-scope .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+}
+
+/* Typography inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .text-white,
+html:not(.dark) [role="dialog"] .text-white,
+html:not(.dark) [data-radix-popper-content-wrapper] .text-white {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .dashboard-scope .text-gray-200,
+html:not(.dark) .dashboard-scope .text-gray-300,
+html:not(.dark) [role="dialog"] .text-gray-200,
+html:not(.dark) [role="dialog"] .text-gray-300 {
+    color: #334155 !important;
+}
+
+html:not(.dark) .dashboard-scope .text-gray-400,
+html:not(.dark) .dashboard-scope .text-gray-500,
+html:not(.dark) [role="dialog"] .text-gray-400 {
+    color: #64748b !important;
+}
+
+/* Accent Badges & Links inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .text-teal-300,
+html:not(.dark) .dashboard-scope .text-teal-400,
+html:not(.dark) [role="dialog"] .text-teal-400 {
+    color: #0d9488 !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-teal-950\/60,
+html:not(.dark) .dashboard-scope .bg-teal-950\/80 {
+    background-color: #ccfbf1 !important;
+}
+
+/* Invert white logo mark inside the Light Mode Dashboard sidebar so it is crisp on light background */
+html:not(.dark) .dashboard-scope aside img[src*="logo.svg"],
+html:not(.dark) .dashboard-scope .w-64 img[src*="logo.svg"] {
+    filter: brightness(0.15);
 }

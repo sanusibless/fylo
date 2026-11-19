@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Folder, FolderInput, Check, HardDrive } from "lucide-react";
 import { type FileItem, type FolderItem } from "@/types";
+import { router } from "@inertiajs/react";
+import { toast } from "sonner";
 import axios from "axios";
 
 interface MoveFileModalProps {
@@ -25,7 +27,8 @@ export default function MoveFileModal({
 
   useEffect(() => {
     if (isOpen) {
-      axios.get('/folders', { headers: { Accept: 'application/json' } })
+      axios
+        .get("/folders", { headers: { Accept: "application/json" } })
         .then((res) => {
           if (res.data?.allFolders) {
             setFolders(res.data.allFolders);
@@ -44,12 +47,16 @@ export default function MoveFileModal({
     setError(null);
 
     try {
-      await axios.post(`/file/${file.uuid}/move`, {
-        folder_id: selectedFolderId,
-      });
+      await axios.post(
+        `/file/${file.uuid}/move`,
+        { folder_id: selectedFolderId },
+        { headers: { Accept: "application/json" } }
+      );
 
+      toast.success("File moved successfully");
       onMoved?.();
       onClose();
+      router.reload();
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to move file.");
     } finally {

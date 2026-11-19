@@ -54,7 +54,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         required
                         autoFocus
                         tabIndex={1}
-                        placeholder="alex@example.com"
+                        placeholder="chinedu@example.com"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         className="bg-[#202a3c] border-slate-700 text-white placeholder:text-gray-500"

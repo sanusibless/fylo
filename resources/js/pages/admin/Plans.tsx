@@ -1,14 +1,10 @@
 import { useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
+import { formatCurrency } from "@/lib/utils";
 import {
-  CreditCard,
   Edit2,
-  Check,
   ArrowLeft,
-  Sparkles,
-  HardDrive,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,7 +60,7 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
 
   return (
     <DashboardLayout>
-      <Head title="Subscription Plans - Admin Console" />
+      <Head title="Subscription Plans (₦) - Admin Console" />
 
       <div className="space-y-6">
         {/* Header */}
@@ -76,7 +72,7 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
                 Back to Admin Dashboard
               </Link>
             </div>
-            <h1 className="text-2xl font-bold text-white">Configured Storage Packages</h1>
+            <h1 className="text-2xl font-bold text-white">Configured Storage Packages (NGN)</h1>
           </div>
         </div>
 
@@ -104,11 +100,11 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
                 </div>
 
                 <div className="text-2xl font-extrabold text-white mt-2">
-                  ${Number(plan.price_monthly).toFixed(2)}
+                  {formatCurrency(plan.price_monthly)}
                   <span className="text-xs text-gray-400 font-normal"> /mo</span>
                 </div>
                 <div className="text-xs text-gray-400">
-                  ${Number(plan.price_yearly).toFixed(2)} /year
+                  {formatCurrency(plan.price_yearly)} /year
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs text-gray-300">
@@ -145,7 +141,7 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
       <Dialog open={!!editingPlan} onOpenChange={(open) => !open && setEditingPlan(null)}>
         <DialogContent className="bg-[#1c2431] border border-slate-700 text-white">
           <DialogHeader>
-            <DialogTitle>Configure {editingPlan?.name} Plan</DialogTitle>
+            <DialogTitle>Configure {editingPlan?.name} Plan (₦ / NGN)</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleUpdate} className="space-y-4 pt-2 text-xs">
@@ -184,7 +180,7 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-gray-300">Monthly Price ($)</Label>
+                <Label className="text-gray-300">Monthly Price (₦)</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -196,7 +192,7 @@ export default function AdminPlans({ plans }: AdminPlansProps) {
               </div>
 
               <div>
-                <Label className="text-gray-300">Yearly Price ($)</Label>
+                <Label className="text-gray-300">Yearly Price (₦)</Label>
                 <Input
                   type="number"
                   step="0.01"

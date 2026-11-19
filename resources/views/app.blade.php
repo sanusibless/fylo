@@ -6,34 +6,40 @@
 
         <meta name="color-scheme" content="dark light">
 
-        {{-- Inline script to ensure dark theme is applied by default for Fylo SaaS experience --}}
+        {{-- Inline script to ensure saved theme is applied before first paint --}}
         <script>
             (function() {
-                const appearance = '{{ $appearance ?? "dark" }}';
+                const saved = localStorage.getItem('appearance');
+                const appearance = saved || '{{ $appearance ?? "dark" }}';
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = appearance === 'dark' || (appearance === 'system' && prefersDark);
 
-                if (appearance === 'light') {
+                if (!isDark) {
                     document.documentElement.classList.remove('dark');
+                    document.documentElement.style.colorScheme = 'light';
                 } else {
                     document.documentElement.classList.add('dark');
+                    document.documentElement.style.colorScheme = 'dark';
                 }
             })();
         </script>
 
-        {{-- Inline style to prevent FOUC with Fylo brand dark canvas --}}
+        {{-- Inline style to prevent FOUC --}}
         <style>
             html {
-                background-color: #0b1523;
-                color: #ffffff;
-                color-scheme: dark;
+                background-color: #f8fafc;
+                color: #0f172a;
+                color-scheme: light;
             }
 
             html.dark {
                 background-color: #0b1523;
                 color: #ffffff;
+                color-scheme: dark;
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('fylo.name', config('app.name', 'Fylo')) }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net" />
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
@@ -44,23 +50,8 @@
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
         @routes
-        @inertia
     </head>
     <body class="font-sans antialiased">
         @inertia
     </body>
-
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-        var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-        (function(){
-        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-        s1.async=true;
-        s1.src='https://embed.tawk.to/69caf92f8ea3191c37389dfd/1jl0dqoph';
-        s1.charset='UTF-8';
-        s1.setAttribute('crossorigin','*');
-        s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-<!--End of Tawk.to Script-->
 </html>

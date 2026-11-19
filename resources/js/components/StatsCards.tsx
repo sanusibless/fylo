@@ -8,7 +8,9 @@ interface StatsCardsProps {
     downloads?: number | string;
 }
 
-export function StatsCards({ totalFiles = 0, sharedFiles = 0, storageUsed = 0, downloads = 0 }: StatsCardsProps) {
+export function StatsCards({ totalFiles = 0, sharedFiles = 0, storageUsed = "0 GB", downloads = 0 }: StatsCardsProps) {
+    const formattedStorage = typeof storageUsed === "number" ? `${storageUsed} GB` : storageUsed;
+
     const stats = [
         {
             name: "Total Files",
@@ -24,7 +26,7 @@ export function StatsCards({ totalFiles = 0, sharedFiles = 0, storageUsed = 0, d
         },
         {
             name: "Storage Used",
-            value: `${storageUsed} GB`,
+            value: formattedStorage,
             icon: HardDrive,
             badge: "Cloud disk",
         },

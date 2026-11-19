@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Download, ExternalLink, FileText, Image as ImageIcon, Video, Music, Archive, Eye } from "lucide-react";
+import { Download, FileText, Image as ImageIcon, Video, Music, Archive, Loader2 } from "lucide-react";
 import { type FileItem } from "@/types";
 
 interface FilePreviewModalProps {
@@ -20,19 +19,33 @@ export default function FilePreviewModal({
   downloadUrl,
 }: FilePreviewModalProps) {
   const [zoom, setZoom] = useState(1);
+  const [textContent, setTextContent] = useState<string | null>(null);
+  const [loadingText, setLoadingText] = useState(false);
+
+  const ext = file?.extension?.toLowerCase() || file?.name.split(".").pop()?.toLowerCase() || "";
+  const isText = ["txt", "csv", "json", "md", "xml", "log", "rtf"].includes(ext);
+  const resolvedPreviewUrl = file ? previewUrl || `/file/${file.uuid}/preview` : "";
+  const resolvedDownloadUrl = file ? downloadUrl || `/file/${file.uuid}/download` : "";
+
+  useEffect(() => {
+    if (isOpen && file && isText && resolvedPreviewUrl) {
+      setLoadingText(true);
+      fetch(resolvedPreviewUrl)
+        .then((res) => (res.ok ? res.text() : Promise.reject()))
+        .then((txt) => setTextContent(txt.slice(0, 100000)))
+        .catch(() => setTextContent("Unable to load text preview."))
+        .finally(() => setLoadingText(false));
+    } else {
+      setTextContent(null);
+    }
+  }, [isOpen, file, isText, resolvedPreviewUrl]);
 
   if (!file) return null;
 
-  const resolvedPreviewUrl = previewUrl || `/file/${file.uuid}/preview`;
-  const resolvedDownloadUrl = downloadUrl || `/file/${file.uuid}/download`;
-
-  const ext = file.name.split('.').pop()?.toLowerCase() || '';
-
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext) || file.type === 'image';
-  const isVideo = ['mp4', 'webm', 'ogg', 'mov', 'mkv'].includes(ext) || file.type === 'video';
-  const isAudio = ['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext) || file.type === 'audio';
-  const isPdf = ext === 'pdf';
-  const isText = ['txt', 'csv', 'json', 'md', 'html', 'js', 'ts', 'css', 'xml', 'log'].includes(ext);
+  const isImage = ["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext) || file.type === "image";
+  const isVideo = ["mp4", "webm", "ogg", "mov", "mkv"].includes(ext) || file.type === "video";
+  const isAudio = ["mp3", "wav", "ogg", "m4a", "flac"].includes(ext) || file.type === "audio";
+  const isPdf = ext === "pdf";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -53,7 +66,7 @@ export default function FilePreviewModal({
               <div className="text-xs text-gray-400 flex items-center space-x-3 mt-0.5">
                 <span>{file.size_in_mb || file.size_in_kb}</span>
                 <span>•</span>
-                <span>{file.formatted_date || file.created_at || 'Recently uploaded'}</span>
+                <span>{file.formatted_date || file.created_at || "Recently uploaded"}</span>
               </div>
             </div>
           </div>
@@ -76,7 +89,7 @@ export default function FilePreviewModal({
               <img
                 src={resolvedPreviewUrl}
                 alt={file.name}
-                style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s' }}
+                style={{ transform: `scale(${zoom})`, transition: "transform 0.2s" }}
                 className="max-h-[55vh] max-w-full rounded-lg object-contain shadow-lg"
               />
               <div className="flex items-center space-x-2 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-700 text-xs">
@@ -130,14 +143,29 @@ export default function FilePreviewModal({
             />
           )}
 
-          {!isImage && !isVideo && !isAudio && !isPdf && (
+          {isText && !isImage && !isVideo && !isAudio && !isPdf && (
+            <div className="w-full h-[55vh] rounded-xl border border-slate-700 bg-[#0b1523] p-4 overflow-auto">
+              {loadingText ? (
+                <div className="flex items-center justify-center h-full text-xs text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin mr-2 text-teal-400" />
+                  Loading document contents...
+                </div>
+              ) : (
+                <pre className="text-xs font-mono text-gray-200 whitespace-pre-wrap break-words leading-relaxed">
+                  {textContent}
+                </pre>
+              )}
+            </div>
+          )}
+
+          {!isImage && !isVideo && !isAudio && !isPdf && !isText && (
             <div className="text-center py-12 px-6 max-w-md space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center mx-auto text-teal-400">
                 <Archive className="w-8 h-8" />
               </div>
               <h4 className="text-lg font-bold text-white">{file.name}</h4>
               <p className="text-xs text-gray-400">
-                Direct in-browser preview is not available for this file format ({ext.toUpperCase() || 'Binary'}). You can securely download and view it on your local device.
+                Direct in-browser preview is not available for this file format ({ext.toUpperCase() || "Binary"}). You can download and open it on your device.
               </p>
               <a
                 href={resolvedDownloadUrl}

@@ -22,9 +22,38 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface AppConfig {
+    name: string;
+    tagline?: string;
+    baseUrl: string;
+    location: {
+        city: string;
+        state: string;
+        country: string;
+        full: string;
+        short: string;
+    };
+    currency: {
+        code: string;
+        symbol: string;
+        locale: string;
+    };
+    contact: {
+        support_email: string;
+        sales_email: string;
+        security_email: string;
+        privacy_email: string;
+        phone: string;
+        hours: string;
+    };
+    maxDefaultUploadMB: number;
+    allowedExtensions: string[];
+}
+
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
+    quote?: { message: string; author: string };
+    appConfig?: AppConfig;
     auth: Auth;
     storage?: StorageUsage;
     flash?: {
@@ -63,8 +92,15 @@ export interface FileItem {
     name: string;
     type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder' | 'unknown' | string;
     mime_type?: string;
+    extension?: string;
     uuid: string;
     folder_id?: number | null;
+    folder?: {
+        id: number;
+        uuid: string;
+        name: string;
+        color?: string;
+    } | null;
     size: number | string;
     size_in_kb?: string;
     size_in_mb: number | string;
@@ -73,6 +109,7 @@ export interface FileItem {
     downloads?: number;
     is_favorite?: boolean;
     is_public?: boolean;
+    has_share_password?: boolean;
     share_token?: string | null;
     share_expires_at?: string | null;
     thumbnail?: string;
@@ -118,6 +155,7 @@ export interface StoragePlanItem {
     capacity: string | number;
     price_monthly: number | string;
     price_yearly: number | string;
+    yearly_savings?: number | string;
     currency?: string;
     description?: string;
     features?: string[];
@@ -126,9 +164,31 @@ export interface StoragePlanItem {
     is_active?: boolean;
 }
 
+export interface PaymentGatewayOption {
+    id: 'moneta' | 'paystack' | string;
+    name: string;
+    description: string;
+    available: boolean;
+    is_default: boolean;
+}
+
+export interface CheckoutPricingBreakdown {
+    monthly_price: number;
+    yearly_price: number;
+    billing_cycle: 'monthly' | 'yearly';
+    subtotal: number;
+    discount_percentage: number;
+    discount_amount: number;
+    total_payable: number;
+    currency: string;
+}
+
 export interface StorageUsage {
     totalUsed: number | string;
+    totalUsedBytes?: number;
     totalAvailable: number | string;
+    totalAvailableBytes?: number;
+    maxFileSizeMB?: number;
     planName?: string;
     availableStorage?: {
         id?: number;

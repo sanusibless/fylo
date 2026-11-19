@@ -22,7 +22,7 @@ export default function DashboardLayout({
   const { storage: sharedStorage } = usePage<SharedData>().props;
 
   return (
-    <div className="bg-[#1c2431] text-white min-h-screen flex w-full font-sans antialiased selection:bg-teal-400 selection:text-slate-900">
+    <div className="dashboard-scope bg-background text-foreground min-h-screen flex w-full font-sans antialiased selection:bg-teal-400 selection:text-slate-900 transition-colors duration-200">
       <Head title={title} />
 
       <DashboardSidebar

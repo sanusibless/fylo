@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { usePage } from "@inertiajs/react";
 import {
   Link as LinkIcon,
   Copy,
   Check,
   Lock,
   Calendar,
-  AlertCircle,
   Trash2,
   ExternalLink,
   ShieldCheck,
 } from "lucide-react";
-import { type FileItem } from "@/types";
+import { type FileItem, type SharedData } from "@/types";
 import axios from "axios";
 
 interface PublicShareModalProps {
@@ -30,20 +30,27 @@ export default function PublicShareModal({
   onClose,
   onUpdated,
 }: PublicShareModalProps) {
+  const { appConfig } = usePage<SharedData>().props;
+  const baseUrl = appConfig?.baseUrl || (typeof window !== "undefined" ? window.location.origin : "");
+
   const [password, setPassword] = useState("");
   const [expiresInDays, setExpiresInDays] = useState("7");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(
-    file?.share_token ? `${window.location.origin}/s/${file.share_token}` : null
+    file?.share_token ? `${baseUrl}/s/${file.share_token}` : null
   );
-  const [hasPassword, setHasPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setShareUrl(file?.share_token ? `${baseUrl}/s/${file.share_token}` : null);
+    setStatusMessage(null);
+  }, [file, baseUrl, isOpen]);
 
   if (!file) return null;
 
   const currentShareUrl =
-    shareUrl || (file.share_token ? `${window.location.origin}/s/${file.share_token}` : null);
+    shareUrl || (file.share_token ? `${baseUrl}/s/${file.share_token}` : null);
 
   const handleGenerateLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +65,6 @@ export default function PublicShareModal({
 
       if (response.data?.status) {
         setShareUrl(response.data.share_url);
-        setHasPassword(response.data.has_password);
         setStatusMessage("Public share link created successfully!");
         onUpdated?.();
       }
@@ -81,7 +87,7 @@ export default function PublicShareModal({
       setPassword("");
       setStatusMessage("Public link has been revoked.");
       onUpdated?.();
-    } catch (err: any) {
+    } catch {
       setStatusMessage("Failed to revoke link.");
     } finally {
       setLoading(false);
@@ -148,7 +154,7 @@ export default function PublicShareModal({
                 rel="noreferrer"
                 className="text-teal-400 hover:underline inline-flex items-center space-x-1"
               >
-                <span>Preview</span>
+                <span>Open Link</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
@@ -193,7 +199,7 @@ export default function PublicShareModal({
               <Input
                 id="link-pass"
                 type="password"
-                placeholder="Leave blank for public access"
+                placeholder="Leave blank for open link access"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-[#0b1523] border-slate-700 text-white placeholder:text-gray-500 text-xs"
