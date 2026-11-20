@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserStoragePlan extends Model
 {
+    use HasFactory;
+
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'auto_renew' => 'boolean',
+    ];
 
     public function user()
     {

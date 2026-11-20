@@ -22,10 +22,45 @@ export interface NavItem {
     isActive?: boolean;
 }
 
+export interface AppConfig {
+    name: string;
+    tagline?: string;
+    baseUrl: string;
+    location: {
+        city: string;
+        state: string;
+        country: string;
+        full: string;
+        short: string;
+    };
+    currency: {
+        code: string;
+        symbol: string;
+        locale: string;
+    };
+    contact: {
+        support_email: string;
+        sales_email: string;
+        security_email: string;
+        privacy_email: string;
+        phone: string;
+        hours: string;
+    };
+    maxDefaultUploadMB: number;
+    allowedExtensions: string[];
+}
+
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
+    quote?: { message: string; author: string };
+    appConfig?: AppConfig;
     auth: Auth;
+    storage?: StorageUsage;
+    flash?: {
+        success?: string;
+        status?: string;
+        error?: string;
+    };
     sidebarOpen: boolean;
     [key: string]: unknown;
 }
@@ -34,11 +69,21 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    phone?: string;
+    is_admin?: boolean;
     initial?: string;
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    user_storage_plan?: {
+        id: number;
+        storage_plan_id: number;
+        billing_cycle?: string;
+        status?: string;
+        expires_at?: string;
+        storage_plan_detail?: StoragePlanItem;
+    };
     [key: string]: unknown;
 }
 
@@ -46,7 +91,16 @@ export interface FileItem {
     id: number | string;
     name: string;
     type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'folder' | 'unknown' | string;
+    mime_type?: string;
+    extension?: string;
     uuid: string;
+    folder_id?: number | null;
+    folder?: {
+        id: number;
+        uuid: string;
+        name: string;
+        color?: string;
+    } | null;
     size: number | string;
     size_in_kb?: string;
     size_in_mb: number | string;
@@ -54,10 +108,25 @@ export interface FileItem {
     total_downloads?: string | number;
     downloads?: number;
     is_favorite?: boolean;
+    is_public?: boolean;
+    has_share_password?: boolean;
+    share_token?: string | null;
+    share_expires_at?: string | null;
     thumbnail?: string;
     created_at?: string;
     updated_at?: string;
     deleted_at?: string | null;
+}
+
+export interface FolderItem {
+    id: number;
+    uuid: string;
+    name: string;
+    parent_id?: number | null;
+    color?: string;
+    files_count?: number;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface SharedFileItem {
@@ -79,15 +148,70 @@ export interface ActivityItem {
     properties?: Record<string, unknown>;
 }
 
+export interface StoragePlanItem {
+    id: number;
+    name: string;
+    slug?: string;
+    capacity: string | number;
+    price_monthly: number | string;
+    price_yearly: number | string;
+    yearly_savings?: number | string;
+    currency?: string;
+    description?: string;
+    features?: string[];
+    max_file_size_mb?: number;
+    is_popular?: boolean;
+    is_active?: boolean;
+}
+
+export interface PaymentGatewayOption {
+    id: 'moneta' | 'paystack' | string;
+    name: string;
+    description: string;
+    available: boolean;
+    is_default: boolean;
+}
+
+export interface CheckoutPricingBreakdown {
+    monthly_price: number;
+    yearly_price: number;
+    billing_cycle: 'monthly' | 'yearly';
+    subtotal: number;
+    discount_percentage: number;
+    discount_amount: number;
+    total_payable: number;
+    currency: string;
+}
+
 export interface StorageUsage {
     totalUsed: number | string;
+    totalUsedBytes?: number;
     totalAvailable: number | string;
+    totalAvailableBytes?: number;
+    maxFileSizeMB?: number;
     planName?: string;
     availableStorage?: {
         id?: number;
         name?: string;
         capacity?: string | number;
     } | null;
+}
+
+export interface PaymentItem {
+    id: number;
+    user_id: number;
+    storage_plan_id: number;
+    reference: string;
+    amount: string | number;
+    currency: string;
+    billing_cycle: string;
+    provider: string;
+    status: 'successful' | 'pending' | 'failed' | string;
+    metadata?: Record<string, unknown>;
+    paid_at?: string | null;
+    created_at: string;
+    plan?: StoragePlanItem;
+    user?: User;
 }
 
 export interface PaginatedData<T> {

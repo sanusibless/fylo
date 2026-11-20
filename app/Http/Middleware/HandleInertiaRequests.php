@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,14 +35,42 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $user = $request->user();
+        $storage = null;
+        if ($user) {
+            $activeRecord = $user->activeStoragePlanRecord();
+            $userPlan = $activeRecord?->storagePlanDetail;
+            $storage = [
+                'totalUsed' => round($user->totalStorageUsedBytes() / (1024 * 1024 * 1024), 4),
+                'totalUsedBytes' => (int) $user->totalStorageUsedBytes(),
+                'totalAvailable' => $user->storageCapacityGB(),
+                'totalAvailableBytes' => (int) $user->storageCapacityBytes(),
+                'maxFileSizeMB' => $user->maxUploadSizeMB(),
+                'planName' => $userPlan?->name ?? 'Free',
+            ];
+        }
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
+            'name' => config('fylo.name', config('app.name', 'Fylo')),
+            'appConfig' => [
+                'name' => config('fylo.name', 'Fylo'),
+                'tagline' => config('fylo.tagline'),
+                'baseUrl' => rtrim(config('app.url'), '/'),
+                'location' => config('fylo.location'),
+                'currency' => config('fylo.currency'),
+                'contact' => config('fylo.contact'),
+                'maxDefaultUploadMB' => config('fylo.storage.default_max_file_size_mb', 50),
+                'allowedExtensions' => config('fylo.storage.allowed_extensions', []),
+            ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+            ],
+            'storage' => $storage,
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'status' => $request->session()->get('status'),
+                'error' => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    'paystack' => [
+        'environment' => env('PAYSTACK_ENVIRONMENT', 'test'),
+        'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+        'test_public_key' => env('PAYSTACK_TEST_PUBLIC_KEY'),
+        'test_secret_key' => env('PAYSTACK_TEST_SECRET_KEY'),
+        'live_public_key' => env('PAYSTACK_LIVE_PUBLIC_KEY'),
+        'live_secret_key' => env('PAYSTACK_LIVE_SECRET_KEY'),
+        'callback_url' => env('PAYSTACK_CALLBACK_URL'),
+        'webhook_secret' => env('PAYSTACK_WEBHOOK_SECRET'),
+    ],
+
+    'moneta' => [
+        'environment' => env('MONETA_ENVIRONMENT', 'test'),
+        'base_url' => env('MONETA_BASE_URL'),
+        'public_key' => env('MONETA_PUBLIC_KEY'),
+        'secret_key' => env('MONETA_SECRET_KEY'),
+        'callback_url' => env('MONETA_CALLBACK_URL'),
+        'webhook_secret' => env('MONETA_WEBHOOK_SECRET'),
+    ],
+
 ];

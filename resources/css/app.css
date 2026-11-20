@@ -49,6 +49,11 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    --color-fylo-header: var(--fylo-header);
+    --color-fylo-main: var(--fylo-main);
+    --color-fylo-card: var(--fylo-card);
+    --color-fylo-text-muted: var(--fylo-text-muted);
+
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -59,215 +64,243 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Light Mode Tokens (Active when html does NOT have .dark) */
 :root {
-    /* Fylo Dark Theme */
-    --background: 218 39% 11%; /* #1c2431 */
-    --foreground: 0 0% 100%;
+    color-scheme: light;
+    --background: hsl(210 40% 98%); /* #f8fafc */
+    --foreground: hsl(222 47% 11%); /* #0f172a */
 
-    --card: 218 33% 16%; /* #202a3c */
-    --card-foreground: 0 0% 100%;
+    --card: hsl(0 0% 100%); /* #ffffff */
+    --card-foreground: hsl(222 47% 11%);
 
-    --popover: 218 33% 16%;
-    --popover-foreground: 0 0% 100%;
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
 
-    --primary: 192 77% 59%; /* Teal primary */
-    --primary-foreground: 218 39% 11%;
+    --primary: hsl(175 84% 32%); /* Rich teal #0d9488 */
+    --primary-foreground: hsl(0 0% 100%);
 
-    --secondary: 218 33% 16%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: hsl(210 40% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
 
-    --muted: 218 33% 16%;
-    --muted-foreground: 220 13% 69%; /* gray-300 equivalent */
+    --muted: hsl(210 40% 94%);
+    --muted-foreground: hsl(215 16% 45%);
 
-    --accent: 192 77% 59%;
-    --accent-foreground: 218 39% 11%;
+    --accent: hsl(175 84% 32%);
+    --accent-foreground: hsl(0 0% 100%);
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 100%);
 
-    --border: 218 25% 25%;
-    --input: 218 25% 25%;
-    --ring: 192 77% 59%;
+    --border: hsl(214 32% 88%);
+    --input: hsl(214 32% 88%);
+    --ring: hsl(175 84% 32%);
 
     --radius: 0.75rem;
 
-    /* Fylo Custom Design Tokens */
-    --fylo-header: 218 54% 8%; /* #0b1523 */
-    --fylo-main: 218 39% 11%; /* #1c2431 */
-    --fylo-card: 218 33% 16%; /* #202a3c */
-    --fylo-text-muted: 220 13% 69%;
+    /* Fylo Specific Tokens in Light Mode */
+    --fylo-header: hsl(0 0% 100%);
+    --fylo-main: hsl(210 40% 98%);
+    --fylo-card: hsl(0 0% 100%);
+    --fylo-text-muted: hsl(215 16% 45%);
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(192 77% 59%), hsl(213 94% 68%));
-    --gradient-hover: linear-gradient(135deg, hsl(192 77% 64%), hsl(192 77% 54%));
+    /* Sidebar Tokens in Light Mode */
+    --sidebar: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(222 47% 11%);
+    --sidebar-primary: hsl(175 84% 32%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(210 40% 96%);
+    --sidebar-accent-foreground: hsl(222 47% 11%);
+    --sidebar-border: hsl(214 32% 88%);
+    --sidebar-ring: hsl(175 84% 32%);
 
-    /* Shadows */
-    --shadow-card: 0 4px 6px -1px hsl(218 54% 8% / 0.3);
-    --shadow-elevated: 0 10px 25px -3px hsl(218 54% 8% / 0.4);
+    /* Chart Tokens */
+    --chart-1: hsl(175 84% 32%);
+    --chart-2: hsl(213 94% 55%);
+    --chart-3: hsl(160 60% 40%);
+    --chart-4: hsl(30 80% 50%);
+    --chart-5: hsl(280 65% 55%);
+}
 
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-
+/* Dark Mode Tokens (Active when html has .dark) */
 .dark {
-    --background:
-        oklch(0.145 0 0);
-    --foreground:
-        oklch(0.985 0 0);
-    --card:
-        oklch(0.205 0 0);
-    --card-foreground:
-        oklch(0.985 0 0);
-    --popover:
-        oklch(0.205 0 0);
-    --popover-foreground:
-        oklch(0.985 0 0);
-    --primary:
-        oklch(0.922 0 0);
-    --primary-foreground:
-        oklch(0.205 0 0);
-    --secondary:
-        oklch(0.269 0 0);
-    --secondary-foreground:
-        oklch(0.985 0 0);
-    --muted:
-        oklch(0.269 0 0);
-    --muted-foreground:
-        oklch(0.708 0 0);
-    --accent:
-        oklch(0.269 0 0);
-    --accent-foreground:
-        oklch(0.985 0 0);
-    --destructive:
-        oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.637 0.237 25.331);
-    --border:
-        oklch(1 0 0 / 10%);
-    --input:
-        oklch(1 0 0 / 15%);
-    --ring:
-        oklch(0.556 0 0);
-    --chart-1:
-        oklch(0.488 0.243 264.376);
-    --chart-2:
-        oklch(0.696 0.17 162.48);
-    --chart-3:
-        oklch(0.769 0.188 70.08);
-    --chart-4:
-        oklch(0.627 0.265 303.9);
-    --chart-5:
-        oklch(0.645 0.246 16.439);
-    --sidebar:
-        oklch(0.205 0 0);
-    --sidebar-foreground:
-        oklch(0.985 0 0);
-    --sidebar-primary:
-        oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground:
-        oklch(0.985 0 0);
-    --sidebar-accent:
-        oklch(0.269 0 0);
-    --sidebar-accent-foreground:
-        oklch(0.985 0 0);
-    --sidebar-border:
-        oklch(1 0 0 / 10%);
-    --sidebar-ring:
-        oklch(0.556 0 0);
+    color-scheme: dark;
+    --background: hsl(218 39% 11%); /* #1c2431 */
+    --foreground: hsl(0 0% 100%);
+
+    --card: hsl(218 33% 16%); /* #202a3c */
+    --card-foreground: hsl(0 0% 100%);
+
+    --popover: hsl(218 33% 16%);
+    --popover-foreground: hsl(0 0% 100%);
+
+    --primary: hsl(192 77% 59%); /* Teal primary #65e2d9 */
+    --primary-foreground: hsl(218 39% 11%);
+
+    --secondary: hsl(218 33% 16%);
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --muted: hsl(218 33% 16%);
+    --muted-foreground: hsl(220 13% 69%);
+
+    --accent: hsl(192 77% 59%);
+    --accent-foreground: hsl(218 39% 11%);
+
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 100%);
+
+    --border: hsl(218 25% 25%);
+    --input: hsl(218 25% 25%);
+    --ring: hsl(192 77% 59%);
+
+    --fylo-header: hsl(218 54% 8%); /* #0b1523 */
+    --fylo-main: hsl(218 39% 11%); /* #1c2431 */
+    --fylo-card: hsl(218 33% 16%); /* #202a3c */
+    --fylo-text-muted: hsl(220 13% 69%);
+
+    --sidebar: hsl(218 54% 8%);
+    --sidebar-foreground: hsl(0 0% 100%);
+    --sidebar-primary: hsl(192 77% 59%);
+    --sidebar-primary-foreground: hsl(218 39% 11%);
+    --sidebar-accent: hsl(218 33% 16%);
+    --sidebar-accent-foreground: hsl(0 0% 100%);
+    --sidebar-border: hsl(218 25% 25%);
+    --sidebar-ring: hsl(192 77% 59%);
 }
 
 @layer base {
-
+    * {
+        border-color: var(--border);
+    }
     body {
-        @apply bg-background text-foreground;
+        background-color: var(--background);
+        color: var(--foreground);
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
 }
 
-@theme inline {
-    --radius-sm:
-        calc(var(--radius) - 4px);
-    --radius-md:
-        calc(var(--radius) - 2px);
-    --radius-lg:
-        var(--radius);
-    --radius-xl:
-        calc(var(--radius) + 4px);
-    --color-background:
-        var(--background);
-    --color-foreground:
-        var(--foreground);
-    --color-card:
-        var(--card);
-    --color-card-foreground:
-        var(--card-foreground);
-    --color-popover:
-        var(--popover);
-    --color-popover-foreground:
-        var(--popover-foreground);
-    --color-primary:
-        var(--primary);
-    --color-primary-foreground:
-        var(--primary-foreground);
-    --color-secondary:
-        var(--secondary);
-    --color-secondary-foreground:
-        var(--secondary-foreground);
-    --color-muted:
-        var(--muted);
-    --color-muted-foreground:
-        var(--muted-foreground);
-    --color-accent:
-        var(--accent);
-    --color-accent-foreground:
-        var(--accent-foreground);
-    --color-destructive:
-        var(--destructive);
-    --color-border:
-        var(--border);
-    --color-input:
-        var(--input);
-    --color-ring:
-        var(--ring);
-    --color-chart-1:
-        var(--chart-1);
-    --color-chart-2:
-        var(--chart-2);
-    --color-chart-3:
-        var(--chart-3);
-    --color-chart-4:
-        var(--chart-4);
-    --color-chart-5:
-        var(--chart-5);
-    --color-sidebar:
-        var(--sidebar);
-    --color-sidebar-foreground:
-        var(--sidebar-foreground);
-    --color-sidebar-primary:
-        var(--sidebar-primary);
-    --color-sidebar-primary-foreground:
-        var(--sidebar-primary-foreground);
-    --color-sidebar-accent:
-        var(--sidebar-accent);
-    --color-sidebar-accent-foreground:
-        var(--sidebar-accent-foreground);
-    --color-sidebar-border:
-        var(--sidebar-border);
-    --color-sidebar-ring:
-        var(--sidebar-ring);
+.bg-gradient-primary {
+    background-image: linear-gradient(135deg, hsl(192 77% 59%), hsl(213 94% 68%));
+}
+
+.bg-gradient-hover {
+    background-image: linear-gradient(135deg, hsl(192 77% 64%), hsl(192 77% 54%));
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, hsl(192 77% 59%), hsl(213 94% 68%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   Dashboard Light Mode Theme Overrides (Scoped strictly to .dashboard-scope
+   and Radix portals when html is NOT in .dark mode — Landing pages untouched)
+   ========================================================================== */
+html:not(.dark) .dashboard-scope,
+html:not(.dark) [data-radix-popper-content-wrapper],
+html:not(.dark) [role="dialog"] {
+    color: #0f172a;
+}
+
+/* Surfaces & Backgrounds inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope.bg-\[\#1c2431\],
+html:not(.dark) .dashboard-scope .bg-\[\#1c2431\],
+html:not(.dark) .dashboard-scope .bg-\[\#1c2431\]\/80,
+html:not(.dark) .dashboard-scope .bg-\[\#141b25\]\/60 {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\],
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\]\/70,
+html:not(.dark) .dashboard-scope .bg-\[\#202a3c\]\/40,
+html:not(.dark) [role="dialog"].bg-\[\#1c2431\],
+html:not(.dark) [data-radix-popper-content-wrapper] .bg-\[\#1c2431\] {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\],
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/80,
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/70,
+html:not(.dark) .dashboard-scope .bg-\[\#0b1523\]\/60,
+html:not(.dark) .dashboard-scope .bg-\[\#080f1a\],
+html:not(.dark) [role="dialog"] .bg-\[\#0b1523\],
+html:not(.dark) [role="dialog"] .bg-\[\#0b1523\]\/60 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-slate-800,
+html:not(.dark) .dashboard-scope .bg-slate-800\/60,
+html:not(.dark) [role="dialog"] .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/60:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/40:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-800\/30:hover,
+html:not(.dark) .dashboard-scope .hover\:bg-slate-700:hover {
+    background-color: #e2e8f0 !important;
+}
+
+/* Dashboard Hero & Summary Gradients in Light Mode */
+html:not(.dark) .dashboard-scope .from-teal-900\/60,
+html:not(.dark) .dashboard-scope .from-\[\#202a3c\] {
+    --tw-gradient-from: #e0f2fe !important;
+    --tw-gradient-via: #f0fdfa !important;
+    --tw-gradient-to: #ffffff !important;
+    background-image: linear-gradient(to right, #e0f2fe, #f0fdfa, #ffffff) !important;
+}
+
+/* Borders & Dividers inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .border-slate-800,
+html:not(.dark) .dashboard-scope .border-slate-800\/80,
+html:not(.dark) .dashboard-scope .border-slate-800\/60,
+html:not(.dark) .dashboard-scope .border-slate-700,
+html:not(.dark) [role="dialog"].border-slate-700,
+html:not(.dark) [role="dialog"] .border-slate-800,
+html:not(.dark) [role="dialog"] .border-slate-700,
+html:not(.dark) [data-radix-popper-content-wrapper] .border-slate-700 {
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .dashboard-scope .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+}
+
+/* Typography inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .text-white,
+html:not(.dark) [role="dialog"] .text-white,
+html:not(.dark) [data-radix-popper-content-wrapper] .text-white {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .dashboard-scope .text-gray-200,
+html:not(.dark) .dashboard-scope .text-gray-300,
+html:not(.dark) [role="dialog"] .text-gray-200,
+html:not(.dark) [role="dialog"] .text-gray-300 {
+    color: #334155 !important;
+}
+
+html:not(.dark) .dashboard-scope .text-gray-400,
+html:not(.dark) .dashboard-scope .text-gray-500,
+html:not(.dark) [role="dialog"] .text-gray-400 {
+    color: #64748b !important;
+}
+
+/* Accent Badges & Links inside Dashboard in Light Mode */
+html:not(.dark) .dashboard-scope .text-teal-300,
+html:not(.dark) .dashboard-scope .text-teal-400,
+html:not(.dark) [role="dialog"] .text-teal-400 {
+    color: #0d9488 !important;
+}
+
+html:not(.dark) .dashboard-scope .bg-teal-950\/60,
+html:not(.dark) .dashboard-scope .bg-teal-950\/80 {
+    background-color: #ccfbf1 !important;
+}
+
+/* Invert white logo mark inside the Light Mode Dashboard sidebar so it is crisp on light background */
+html:not(.dark) .dashboard-scope aside img[src*="logo.svg"],
+html:not(.dark) .dashboard-scope .w-64 img[src*="logo.svg"] {
+    filter: brightness(0.15);
 }

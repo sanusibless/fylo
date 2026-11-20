@@ -13,19 +13,25 @@ class UserController extends Controller
     public function search(Request $request)
     {
         try {
-            $query = $request->get('query', '');
+            $query = trim((string) $request->get('query', ''));
+            if (mb_strlen($query) < 2) {
+                return response()->json($this->generalService->serviceResponse(true, 'success', []), 200);
+            }
+
+            $authId = auth()->id();
 
             $users = User::query()
-                ->where('name', 'like', "%{$query}%")
-                ->orWhere('email', 'like', "%{$query}%")
+                ->where('id', '!=', $authId)
+                ->where(function ($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                        ->orWhere('email', 'like', "%{$query}%");
+                })
                 ->limit(10)
                 ->get(['id', 'name', 'email']);
 
-            return response()->json($this->generalService->serviceResponse(true, 'success', $users), 200); // $this->generalService->handle
+            return response()->json($this->generalService->serviceResponse(true, 'success', $users), 200);
         } catch (\Throwable $th) {
-            throw $th;
+            return response()->json($this->generalService->serviceResponse(false, 'Unable to search users', []), 500);
         }
-
-        return response()->json($this->generalService->serviceResponse(true, 'success', $users), 400); // $this->generalService->handle
     }
 }

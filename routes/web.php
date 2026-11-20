@@ -1,71 +1,137 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AdminPlanController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FolderController;
+use App\Http\Controllers\PublicShareController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\EnsureAdmin;
+use App\Models\StoragePlan;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
+$resolvePublicPlans = function () {
+    $configuredPlans = config('fylo.plans', []);
+    $existingSlugs = StoragePlan::pluck('slug')->toArray();
+    $requiredSlugs = array_column($configuredPlans, 'slug');
+
+    if (count(array_intersect($requiredSlugs, $existingSlugs)) < count($requiredSlugs)) {
+        foreach ($configuredPlans as $plan) {
+            StoragePlan::updateOrCreate(['slug' => $plan['slug']], $plan);
+        }
+    }
+
+    return StoragePlan::where('is_active', true)
+        ->when(! empty($requiredSlugs), fn ($q) => $q->whereIn('slug', $requiredSlugs))
+        ->orderBy('price_monthly')
+        ->get();
+};
+
+/*
+|--------------------------------------------------------------------------
+| Public SaaS Pages
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () use ($resolvePublicPlans) {
+    return Inertia::render('welcome', [
+        'plans' => $resolvePublicPlans(),
+    ]);
 })->name('home');
 
 Route::get('/features', function () {
     return Inertia::render('features');
 })->name('features');
 
+Route::get('/pricing', function () use ($resolvePublicPlans) {
+    return Inertia::render('Pricing', [
+        'plans' => $resolvePublicPlans(),
+    ]);
+})->name('pricing');
+
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
+Route::get('/privacy', function () {
+    return Inertia::render('Privacy');
+})->name('privacy');
+
+Route::get('/terms', function () {
+    return Inertia::render('Terms');
+})->name('terms');
+
 Route::get('/faqs', function () {
     return Inertia::render('faqs', [
         'faqs' => [
             [
                 'question' => 'What is Fylo?',
-                'answer' => 'Fylo is a secure cloud storage and collaboration platform where you can store, share, and work on files in real time with your team.',
+                'answer' => 'Fylo is a cloud file storage and document management platform operating from Abuja, Nigeria. You can upload, organize in folders, preview, and share files with colleagues or clients.',
             ],
             [
                 'question' => 'Is Fylo free to use?',
-                'answer' => 'Yes! Fylo offers a free plan with generous storage. For advanced features like unlimited collaboration and enhanced security, you can upgrade to a paid plan anytime.',
+                'answer' => 'Yes. Every new account starts on our Free plan with 5 GB of storage and up to 50 MB per file upload at ₦0. You can upgrade to Starter (₦15,000/month), Growth (₦20,000/month), or Business (₦30,000/month) anytime.',
             ],
             [
-                'question' => 'How secure are my files on Fylo?',
-                'answer' => 'Security is our top priority. Fylo uses end-to-end encryption and two-factor authentication to ensure your files are safe from unauthorized access.',
+                'question' => 'How are my files protected on Fylo?',
+                'answer' => 'Uploaded files are stored in isolated server storage and served exclusively through authenticated ownership and permission checks. Public share links use cryptographic tokens with optional password protection and expiry dates.',
             ],
             [
                 'question' => 'Can I access Fylo on mobile devices?',
-                'answer' => 'Absolutely! Fylo works seamlessly on desktops, tablets, and mobile phones through our responsive web app and dedicated mobile apps.',
+                'answer' => 'Yes. Fylo works across desktops, laptops, tablets, and smartphones through our responsive web interface without requiring additional software installation.',
             ],
             [
-                'question' => 'How does real-time collaboration work?',
-                'answer' => 'Fylo allows multiple users to view, edit, and comment on files at the same time. No more sending endless versions — everyone stays on the same page.',
+                'question' => 'Can I preview files without downloading them?',
+                'answer' => 'Yes. Our built-in preview modal supports images (with zoom controls), PDF documents, video and audio playback, and plain text / CSV / JSON / Markdown inspection directly in your browser.',
             ],
             [
-                'question' => 'What file types can I upload to Fylo?',
-                'answer' => 'You can upload almost any type of file — from documents and spreadsheets to images, videos, and audio files. Fylo supports it all.',
+                'question' => 'Can I share files with people who do not have a Fylo account?',
+                'answer' => 'Yes. You can generate tokenized public share links for any file, protect them with an optional password, set an expiration window, or revoke access with one click.',
             ],
             [
-                'question' => 'Can I share files with people who don’t use Fylo?',
-                'answer' => 'Yes! You can generate secure shareable links for anyone, even if they don’t have a Fylo account.',
+                'question' => 'How does the Recycle Bin (Trash) work?',
+                'answer' => 'When you delete a file, it moves to your Recycle Bin where you can restore it to your workspace or permanently erase it. Trashed files do not count against your active storage quota.',
             ],
             [
-                'question' => 'How do I upgrade to a premium plan?',
-                'answer' => "You can upgrade at any time by visiting your Account Settings and clicking on the 'Subscription' tab. Changes take effect immediately.",
-            ],
-            [
-                'question' => 'What happens when my free trial ends?',
-                'answer' => 'Once your 14-day trial expires, your account will automatically shift to our Free Plan. Your files will remain safe, but advanced collaboration features will be locked until you subscribe.',
-            ],
-            [
-                'question' => 'Can I cancel my subscription whenever I want?',
-                'answer' => 'Yes. Fylo is a month-to-month service. If you cancel, you will maintain access to your premium features until the end of your current billing cycle.',
-            ],
-            [
-                'question' => 'Do you offer discounts for non-profits or students?',
-                'answer' => 'We do! Please reach out to our billing team with a valid ID or documentation, and we’ll apply a 30% discount to your account.',
+                'question' => 'What currency and payment methods do you support?',
+                'answer' => 'All plans and transactions are billed in Nigerian Naira (₦ / NGN). We support Moneta and Paystack (Cards, Bank Transfer, USSD) with a 20% discount on annual subscriptions.',
             ],
         ],
     ]);
 })->name('faqs');
 
+/*
+|--------------------------------------------------------------------------
+| Payment Gateway Webhooks (CSRF Exempt)
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/paystack', [SubscriptionController::class, 'handlePaystackWebhook'])
+    ->name('webhooks.paystack');
+
+/*
+|--------------------------------------------------------------------------
+| Public Tokenized Share Links
+|--------------------------------------------------------------------------
+*/
+Route::prefix('s')->name('public_share.')->group(function () {
+    Route::get('/{token}', [PublicShareController::class, 'show'])->name('show');
+    Route::post('/{token}/verify', [PublicShareController::class, 'unlock'])
+        ->middleware('throttle:10,1')
+        ->name('unlock');
+    Route::get('/{token}/download', [PublicShareController::class, 'download'])->name('download');
+    Route::get('/{token}/preview', [PublicShareController::class, 'preview'])->name('preview');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated User Workspace
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('recent', [DashboardController::class, 'recent'])->name('recent');
@@ -73,23 +139,61 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('trash', [DashboardController::class, 'trash'])->name('trash');
     Route::get('shared-files', [DashboardController::class, 'getSharedFiles'])->name('shared_files');
 
+    // Folders Management
+    Route::prefix('folders')->name('folders.')->group(function () {
+        Route::get('/', [FolderController::class, 'index'])->name('index');
+        Route::post('/', [FolderController::class, 'store'])->name('store');
+        Route::put('/{folder_uuid}', [FolderController::class, 'update'])->name('update');
+        Route::delete('/{folder_uuid}', [FolderController::class, 'destroy'])->name('destroy');
+    });
+
+    // Subscription & Billing
+    Route::prefix('subscription')->name('subscription.')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+        Route::get('/checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout.show');
+        Route::post('/checkout', [SubscriptionController::class, 'checkout'])->name('checkout');
+        Route::get('/callback/{gateway?}', [SubscriptionController::class, 'handleCallback'])->name('callback');
+        Route::post('/verify/{reference}', [SubscriptionController::class, 'verifyTransaction'])->name('verify');
+        Route::post('/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+    });
+
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/search', [UserController::class, 'search'])->name('search');
     });
 
+    // File Operations
     Route::prefix('file')->name('file.')->group(function () {
         Route::post('upload', [FileController::class, 'store'])->name('upload');
+        Route::post('bulk', [FileController::class, 'bulkAction'])->name('bulk');
         Route::delete('/trash/empty', [FileController::class, 'emptyTrash'])->name('empty_trash');
         Route::delete('/{file_uuid}/delete', [FileController::class, 'deleteFile'])->name('delete');
         Route::post('/{file_uuid}/restore', [FileController::class, 'restoreFile'])->name('restore');
         Route::delete('/{file_uuid}/force-delete', [FileController::class, 'forceDeleteFile'])->name('force_delete');
         Route::get('/{file_uuid}/favorite', [FileController::class, 'starringFile'])->name('toggle_favorite');
         Route::get('/{file_uuid}/download', [FileController::class, 'downloadFile'])->name('download');
+        Route::get('/{file_uuid}/preview', [FileController::class, 'previewFile'])->name('preview');
         Route::put('/{file_uuid}/update', [FileController::class, 'updateFile'])->name('update');
         Route::post('share', [FileController::class, 'shareFile'])->name('share');
+        Route::post('/{file_uuid}/public-share', [FileController::class, 'createPublicShare'])->name('public_share');
+        Route::delete('/{file_uuid}/revoke-public-share', [FileController::class, 'revokePublicShare'])->name('revoke_public_share');
+        Route::post('/{file_uuid}/move', [FileController::class, 'moveFile'])->name('move');
     });
+});
 
-    Route::get('logs', [LogViewerController::class, 'index'])->name('logs');
+/*
+|--------------------------------------------------------------------------
+| Admin Portal
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', EnsureAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users');
+    Route::post('/users/{id}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('users.toggle_admin');
+    Route::post('/users/{id}/plan', [AdminUserController::class, 'updatePlan'])->name('users.update_plan');
+    Route::get('/plans', [AdminPlanController::class, 'index'])->name('plans');
+    Route::put('/plans/{id}', [AdminPlanController::class, 'update'])->name('plans.update');
+    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments');
+    Route::get('/logs', [LogViewerController::class, 'index'])->name('logs');
 });
 
 require __DIR__.'/settings.php';

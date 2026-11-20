@@ -12,29 +12,12 @@ class StoragePlanSeeder extends Seeder
      */
     public function run(): void
     {
-        $plans = [
-            [
-                'name' => 'Free',
-                'capacity' => '10',
-            ],
-            [
-                'name' => 'Basic',
-                'capacity' => '20',
-            ],
-            [
-                'name' => 'Premium',
-                'capacity' => '200',
-            ],
-            [
-                'name' => 'Enterprise',
-                'capacity' => 'Unlimited',
-            ],
-        ];
+        $plans = config('fylo.plans', []);
 
         foreach ($plans as $plan) {
-            StoragePlan::firstOrCreate(
-                ['name' => $plan['name']],
-                ['capacity' => $plan['capacity']]
+            StoragePlan::updateOrCreate(
+                ['slug' => $plan['slug']],
+                $plan
             );
         }
     }

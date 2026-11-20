@@ -18,11 +18,16 @@ class FileManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         Storage::fake('public');
 
         StoragePlan::firstOrCreate([
             'name' => 'Free',
+        ], [
+            'slug' => 'free',
             'capacity' => '10',
+            'currency' => 'NGN',
+            'max_file_size_mb' => 50,
         ]);
     }
 
@@ -41,16 +46,49 @@ class FileManagementTest extends TestCase
         $this->assertDatabaseHas('uploaded_files', [
             'user_id' => $user->id,
             'type' => 'document',
+            'extension' => 'pdf',
         ]);
+    }
+
+    public function test_duplicate_file_uploads_are_renamed_cleanly()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->post(route('file.upload'), [
+            'file' => UploadedFile::fake()->create('proposal.pdf', 200, 'application/pdf'),
+        ]);
+        $this->post(route('file.upload'), [
+            'file' => UploadedFile::fake()->create('proposal.pdf', 200, 'application/pdf'),
+        ]);
+
+        $names = File::where('user_id', $user->id)->pluck('name')->toArray();
+        $this->assertContains('proposal.pdf', $names);
+        $this->assertContains('proposal-1.pdf', $names);
+    }
+
+    public function test_executable_and_svg_uploads_are_blocked_for_security()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $maliciousPhp = UploadedFile::fake()->create('shell.php', 100, 'application/x-php');
+        $response = $this->post(route('file.upload'), ['file' => $maliciousPhp]);
+        $response->assertSessionHasErrors(['file']);
+
+        $maliciousSvg = UploadedFile::fake()->create('xss.svg', 100, 'image/svg+xml');
+        $responseSvg = $this->post(route('file.upload'), ['file' => $maliciousSvg]);
+        $responseSvg->assertSessionHasErrors(['file']);
     }
 
     public function test_user_cannot_upload_file_exceeding_storage_quota()
     {
         $user = User::factory()->create();
-        // Give user a tiny 1MB quota
         $tinyPlan = StoragePlan::create([
             'name' => 'Tiny',
+            'slug' => 'tiny',
             'capacity' => '0.0001', // ~100KB
+            'currency' => 'NGN',
         ]);
         UserStoragePlan::where('user_id', $user->id)->update([
             'storage_plan_id' => $tinyPlan->id,
@@ -68,9 +106,10 @@ class FileManagementTest extends TestCase
         $response->assertSessionHasErrors(['file']);
     }
 
-    public function test_user_can_star_and_unstar_file()
+    public function test_user_can_star_and_unstar_file_and_stranger_cannot()
     {
         $user = User::factory()->create();
+        $stranger = User::factory()->create();
         $this->actingAs($user);
 
         $fakeFile = UploadedFile::fake()->create('report.pdf', 500, 'application/pdf');
@@ -84,7 +123,14 @@ class FileManagementTest extends TestCase
         $response->assertOk()->assertJson(['starred' => true]);
         $this->assertTrue((bool) $file->fresh()->is_favorite);
 
-        // Unstar file
+        // Stranger tries to unstar owner's file (IDOR check)
+        $this->actingAs($stranger);
+        $strangerResp = $this->getJson(route('file.toggle_favorite', ['file_uuid' => $file->uuid]));
+        $strangerResp->assertStatus(403);
+        $this->assertTrue((bool) $file->fresh()->is_favorite);
+
+        // Owner unstars file
+        $this->actingAs($user);
         $response = $this->getJson(route('file.toggle_favorite', ['file_uuid' => $file->uuid]));
         $response->assertOk()->assertJson(['starred' => false]);
         $this->assertFalse((bool) $file->fresh()->is_favorite);
@@ -109,7 +155,7 @@ class FileManagementTest extends TestCase
         $this->assertEquals('renamed-document.pdf', $file->fresh()->name);
     }
 
-    public function test_user_can_download_their_own_file()
+    public function test_user_can_download_and_preview_their_own_file()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -119,12 +165,15 @@ class FileManagementTest extends TestCase
 
         $file = File::where('user_id', $user->id)->firstOrFail();
 
+        $previewResponse = $this->get(route('file.preview', ['file_uuid' => $file->uuid]));
+        $previewResponse->assertOk();
+
         $response = $this->get(route('file.download', ['file_uuid' => $file->uuid]));
         $response->assertOk();
         $this->assertEquals(1, $file->fresh()->downloads);
     }
 
-    public function test_unauthorized_user_cannot_download_private_file()
+    public function test_unauthorized_user_cannot_download_or_preview_private_file()
     {
         $owner = User::factory()->create();
         $stranger = User::factory()->create();
@@ -135,10 +184,13 @@ class FileManagementTest extends TestCase
 
         $file = File::where('user_id', $owner->id)->firstOrFail();
 
-        // Stranger tries to download
+        // Stranger tries to download & preview
         $this->actingAs($stranger);
         $response = $this->get(route('file.download', ['file_uuid' => $file->uuid]));
         $response->assertSessionHasErrors(['file']);
+
+        $previewResponse = $this->get(route('file.preview', ['file_uuid' => $file->uuid]));
+        $previewResponse->assertStatus(403);
     }
 
     public function test_user_can_share_file_with_another_user()
@@ -201,9 +253,13 @@ class FileManagementTest extends TestCase
         $this->delete(route('file.delete', ['file_uuid' => $file->uuid]));
         $this->assertSoftDeleted('uploaded_files', ['id' => $file->id]);
 
+        // Trashed files do not count toward active storage quota
+        $this->assertEquals(0, $user->fresh()->totalStorageUsedBytes());
+
         // 2. Restore from Trash
         $this->post(route('file.restore', ['file_uuid' => $file->uuid]));
         $this->assertNotSoftDeleted('uploaded_files', ['id' => $file->id]);
+        $this->assertGreaterThan(0, $user->fresh()->totalStorageUsedBytes());
 
         // 3. Force delete (permanent deletion)
         $this->delete(route('file.force_delete', ['file_uuid' => $file->uuid]));

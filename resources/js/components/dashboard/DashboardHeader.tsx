@@ -1,4 +1,4 @@
-import { Search, Bell, Menu, User } from "lucide-react";
+import { Search, Menu, User, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
 import AuthLogoutModal from "@/pages/auth/logout-modal";
 import useAuth from "@/hooks/use-auth";
+import { useAppearance } from "@/hooks/use-appearance";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faHeadset, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { route } from "ziggy-js";
@@ -24,8 +25,14 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ onSidebarToggle, onSearch }: DashboardHeaderProps) {
   const user = useAuth();
+  const { appearance, updateAppearance } = useAppearance();
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
   const [searchVal, setSearchVal] = useState("");
+
+  const isLightMode = appearance === "light";
+  const toggleTheme = () => {
+    updateAppearance(isLightMode ? "dark" : "light");
+  };
 
   const handleLogout = () => {
     setOpenLogoutModal(true);
@@ -59,13 +66,30 @@ export function DashboardHeader({ onSidebarToggle, onSearch }: DashboardHeaderPr
                 placeholder="Search files and folders..."
                 value={searchVal}
                 onChange={handleSearchChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !onSearch && searchVal.trim()) {
+                    window.location.href = `/dashboard?search=${encodeURIComponent(searchVal.trim())}`;
+                  }
+                }}
                 className="w-80 pl-10 bg-muted/50 border-border focus:bg-card text-foreground"
               />
             </div>
           </div>
 
           {/* Right section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Quick Theme Mode Toggle */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              className="h-9 w-9 rounded-full p-0 text-muted-foreground hover:text-foreground border border-border bg-muted/40"
+            >
+              {isLightMode ? <Moon className="h-4 w-4 text-slate-700" /> : <Sun className="h-4 w-4 text-teal-400" />}
+            </Button>
+
             {/* User menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
